@@ -2571,19 +2571,47 @@ CMakeFiles/main.dir/main.cpp.o: main.cpp \
   /home/nhewko/local/include/deal.II/base/data_out_base.h \
   /home/nhewko/local/include/deal.II/numerics/data_component_interpretation.h \
   /home/nhewko/local/include/deal.II/grid/grid_in.h \
-  /home/nhewko/openifem_stuff/OpenIFEM/include/parameters.h \
-  /home/nhewko/openifem_stuff/OpenIFEM/include/utilities.h \
+  /home/nhewko/openifem_stuff/OpenIFEM/include/linear_elasticity.h \
+  /home/nhewko/openifem_stuff/OpenIFEM/include/linear_elastic_material.h \
+  /home/nhewko/openifem_stuff/OpenIFEM/include/material.h \
+  /home/nhewko/openifem_stuff/OpenIFEM/include/solid_solver.h \
+  /home/nhewko/local/include/deal.II/base/quadrature_point_data.h \
+  /home/nhewko/local/include/deal.II/distributed/tria.h \
+  /home/nhewko/local/include/deal.II/fe/fe_tools.h \
+  /home/nhewko/local/include/deal.II/base/timer.h \
+  /home/nhewko/local/include/deal.II/base/conditional_ostream.h \
+  /home/nhewko/local/include/deal.II/dofs/dof_renumbering.h \
+  /home/nhewko/local/include/deal.II/dofs/dof_tools.h \
+  /home/nhewko/local/include/deal.II/fe/fe_q.h \
+  /home/nhewko/local/include/deal.II/base/tensor_product_polynomials.h \
+  /home/nhewko/local/include/deal.II/base/scalar_polynomials_base.h \
+  /home/nhewko/local/include/deal.II/fe/fe_q_base.h \
+  /home/nhewko/local/include/deal.II/fe/fe_poly.h \
+  /home/nhewko/local/include/deal.II/fe/fe_system.h \
   /home/nhewko/local/include/deal.II/grid/grid_refinement.h \
   /home/nhewko/local/include/deal.II/numerics/vector_tools_common.h \
-  /home/nhewko/local/include/deal.II/grid/manifold_lib.h \
-  /home/nhewko/local/include/deal.II/base/function_parser.h \
-  /home/nhewko/local/include/deal.II/base/auto_derivative_function.h \
-  /home/nhewko/local/include/deal.II/lac/block_vector.h \
-  /home/nhewko/local/include/deal.II/lac/block_vector_base.h \
-  /home/nhewko/local/include/deal.II/lac/petsc_block_vector.h \
+  /home/nhewko/local/include/deal.II/lac/precondition.h \
+  /home/nhewko/local/include/deal.II/base/cuda_size.h \
+  /home/nhewko/local/include/deal.II/lac/diagonal_matrix.h \
+  /home/nhewko/local/include/deal.II/lac/solver_cg.h \
+  /home/nhewko/local/include/deal.II/lac/solver.h \
+  /home/nhewko/local/include/deal.II/lac/solver_control.h \
+  /home/nhewko/local/include/deal.II/lac/vector_memory.h \
+  /home/nhewko/local/include/deal.II/lac/tridiagonal_matrix.h \
+  /home/nhewko/local/include/deal.II/lac/lapack_support.h \
+  /home/nhewko/local/include/deal.II/lac/sparse_matrix.h \
+  /home/nhewko/local/include/deal.II/numerics/data_out.h \
+  /home/nhewko/local/include/deal.II/grid/filtered_iterator.h \
+  /home/nhewko/local/include/deal.II/numerics/data_out_dof_data.h \
+  /home/nhewko/local/include/deal.II/base/mg_level_object.h \
+  /home/nhewko/local/include/deal.II/hp/fe_values.h \
+  /home/nhewko/local/include/deal.II/hp/mapping_collection.h \
+  /home/nhewko/local/include/deal.II/numerics/data_postprocessor.h \
+  /home/nhewko/local/include/deal.II/numerics/error_estimator.h \
+  /home/nhewko/local/include/deal.II/numerics/matrix_tools.h \
+  /home/nhewko/local/include/deal.II/numerics/solution_transfer.h \
   /home/nhewko/local/include/deal.II/numerics/vector_tools.h \
   /home/nhewko/local/include/deal.II/numerics/vector_tools_boundary.h \
-  /home/nhewko/local/include/deal.II/hp/mapping_collection.h \
   /home/nhewko/local/include/deal.II/numerics/vector_tools_constraints.h \
   /home/nhewko/local/include/deal.II/numerics/vector_tools_evaluate.h \
   /home/nhewko/local/include/deal.II/base/mpi_remote_point_evaluation.h \
@@ -2602,8 +2630,34 @@ CMakeFiles/main.dir/main.cpp.o: main.cpp \
   /usr/include/c++/11/fstream \
   /usr/include/x86_64-linux-gnu/c++/11/bits/basic_file.h \
   /usr/include/x86_64-linux-gnu/c++/11/bits/c++io.h \
-  /usr/include/c++/11/bits/fstream.tcc
+  /usr/include/c++/11/bits/fstream.tcc \
+  /home/nhewko/openifem_stuff/OpenIFEM/include/parameters.h \
+  /home/nhewko/openifem_stuff/OpenIFEM/include/utilities.h \
+  /home/nhewko/local/include/deal.II/grid/manifold_lib.h \
+  /home/nhewko/local/include/deal.II/base/function_parser.h \
+  /home/nhewko/local/include/deal.II/base/auto_derivative_function.h \
+  /home/nhewko/local/include/deal.II/lac/block_vector.h \
+  /home/nhewko/local/include/deal.II/lac/block_vector_base.h \
+  /home/nhewko/local/include/deal.II/lac/petsc_block_vector.h \
+  /home/nhewko/openifem_stuff/OpenIFEM/include/parameters.h \
+  /home/nhewko/openifem_stuff/OpenIFEM/include/utilities.h
 
+
+/home/nhewko/local/include/deal.II/lac/petsc_block_vector.h:
+
+/home/nhewko/local/include/deal.II/lac/block_vector_base.h:
+
+/home/nhewko/local/include/deal.II/lac/block_vector.h:
+
+/home/nhewko/local/include/deal.II/base/auto_derivative_function.h:
+
+/home/nhewko/local/include/deal.II/base/function_parser.h:
+
+/home/nhewko/local/include/deal.II/grid/manifold_lib.h:
+
+/home/nhewko/openifem_stuff/OpenIFEM/include/utilities.h:
+
+/home/nhewko/openifem_stuff/OpenIFEM/include/parameters.h:
 
 /usr/include/c++/11/bits/fstream.tcc:
 
@@ -2633,21 +2687,53 @@ CMakeFiles/main.dir/main.cpp.o: main.cpp \
 
 /home/nhewko/local/include/deal.II/numerics/vector_tools.h:
 
-/home/nhewko/local/include/deal.II/lac/petsc_block_vector.h:
+/home/nhewko/local/include/deal.II/numerics/error_estimator.h:
 
-/home/nhewko/local/include/deal.II/lac/block_vector_base.h:
+/home/nhewko/local/include/deal.II/hp/fe_values.h:
 
-/home/nhewko/local/include/deal.II/lac/block_vector.h:
+/home/nhewko/local/include/deal.II/numerics/data_out_dof_data.h:
 
-/home/nhewko/local/include/deal.II/base/auto_derivative_function.h:
+/home/nhewko/local/include/deal.II/grid/filtered_iterator.h:
 
-/home/nhewko/local/include/deal.II/base/function_parser.h:
+/home/nhewko/local/include/deal.II/lac/sparse_matrix.h:
 
-/home/nhewko/local/include/deal.II/grid/manifold_lib.h:
+/home/nhewko/local/include/deal.II/lac/tridiagonal_matrix.h:
 
-/home/nhewko/openifem_stuff/OpenIFEM/include/utilities.h:
+/home/nhewko/local/include/deal.II/lac/vector_memory.h:
 
-/home/nhewko/openifem_stuff/OpenIFEM/include/parameters.h:
+/home/nhewko/local/include/deal.II/lac/solver_control.h:
+
+/home/nhewko/local/include/deal.II/lac/solver.h:
+
+/home/nhewko/local/include/deal.II/lac/solver_cg.h:
+
+/home/nhewko/local/include/deal.II/lac/diagonal_matrix.h:
+
+/home/nhewko/local/include/deal.II/base/cuda_size.h:
+
+/home/nhewko/local/include/deal.II/lac/precondition.h:
+
+/home/nhewko/local/include/deal.II/fe/fe_system.h:
+
+/home/nhewko/local/include/deal.II/fe/fe_poly.h:
+
+/home/nhewko/local/include/deal.II/fe/fe_q_base.h:
+
+/home/nhewko/local/include/deal.II/base/scalar_polynomials_base.h:
+
+/home/nhewko/local/include/deal.II/base/tensor_product_polynomials.h:
+
+/home/nhewko/local/include/deal.II/dofs/dof_renumbering.h:
+
+/home/nhewko/local/include/deal.II/distributed/tria.h:
+
+/home/nhewko/local/include/deal.II/base/quadrature_point_data.h:
+
+/home/nhewko/openifem_stuff/OpenIFEM/include/solid_solver.h:
+
+/home/nhewko/openifem_stuff/OpenIFEM/include/material.h:
+
+/home/nhewko/openifem_stuff/OpenIFEM/include/linear_elastic_material.h:
 
 /home/nhewko/local/include/deal.II/numerics/data_component_interpretation.h:
 
@@ -2674,6 +2760,8 @@ CMakeFiles/main.dir/main.cpp.o: main.cpp \
 /home/nhewko/local/include/deal.II/bundled/boost/random/detail/seed_impl.hpp:
 
 /home/nhewko/local/include/deal.II/bundled/boost/random/detail/config.hpp:
+
+/home/nhewko/local/include/deal.II/numerics/data_postprocessor.h:
 
 /home/nhewko/local/include/deal.II/bundled/boost/integer/integer_mask.hpp:
 
@@ -3145,6 +3233,8 @@ CMakeFiles/main.dir/main.cpp.o: main.cpp \
 
 /home/nhewko/local/include/deal.II/bundled/boost/geometry/iterators/base.hpp:
 
+/home/nhewko/local/include/deal.II/dofs/dof_tools.h:
+
 /home/nhewko/local/include/deal.II/bundled/boost/geometry/strategies/geographic/buffer_point_circle.hpp:
 
 /home/nhewko/local/include/deal.II/base/symmetric_tensor.h:
@@ -3412,6 +3502,8 @@ CMakeFiles/main.dir/main.cpp.o: main.cpp \
 /home/nhewko/local/include/deal.II/bundled/boost/range/has_range_iterator.hpp:
 
 /usr/include/c++/11/ios:
+
+/home/nhewko/local/include/deal.II/fe/fe_tools.h:
 
 /home/nhewko/local/include/deal.II/bundled/boost/preprocessor/variadic/elem.hpp:
 
@@ -3696,6 +3788,8 @@ CMakeFiles/main.dir/main.cpp.o: main.cpp \
 /usr/lib/gcc/x86_64-linux-gnu/11/include/clwbintrin.h:
 
 /home/nhewko/local/include/deal.II/bundled/boost/math/tools/real_cast.hpp:
+
+/home/nhewko/local/include/deal.II/base/timer.h:
 
 /home/nhewko/local/include/deal.II/bundled/boost/numeric/conversion/detail/converter.hpp:
 
@@ -4094,6 +4188,8 @@ CMakeFiles/main.dir/main.cpp.o: main.cpp \
 /home/nhewko/local/include/deal.II/bundled/boost/parameter/aux_/preprocessor/for_each.hpp:
 
 /usr/include/c++/11/iosfwd:
+
+/home/nhewko/local/include/deal.II/lac/lapack_support.h:
 
 /home/nhewko/local/include/deal.II/bundled/boost/geometry/algorithms/detail/envelope/box.hpp:
 
@@ -5007,6 +5103,8 @@ main.cpp:
 
 /home/nhewko/local/include/deal.II/bundled/boost/cstdint.hpp:
 
+/home/nhewko/local/include/deal.II/numerics/solution_transfer.h:
+
 /home/nhewko/local/include/deal.II/bundled/boost/geometry/util/combine_if.hpp:
 
 /home/nhewko/local/include/deal.II/bundled/boost/mpl/not_equal_to.hpp:
@@ -5391,6 +5489,8 @@ main.cpp:
 
 /home/nhewko/local/include/deal.II/bundled/boost/mpl/aux_/preprocessed/gcc/equal_to.hpp:
 
+/home/nhewko/local/include/deal.II/fe/fe_q.h:
+
 /home/nhewko/local/include/deal.II/bundled/boost/geometry/core/coordinate_system.hpp:
 
 /home/nhewko/local/include/deal.II/bundled/boost/mpl/aux_/preprocessed/gcc/greater.hpp:
@@ -5725,6 +5825,8 @@ main.cpp:
 
 /home/nhewko/local/include/deal.II/bundled/boost/geometry/algorithms/assign.hpp:
 
+/home/nhewko/local/include/deal.II/base/conditional_ostream.h:
+
 /home/nhewko/local/include/deal.II/bundled/boost/mpl/list/list10.hpp:
 
 /usr/lib/gcc/x86_64-linux-gnu/11/include/avx512vbmi2vlintrin.h:
@@ -5898,6 +6000,8 @@ main.cpp:
 /home/nhewko/local/include/deal.II/bundled/boost/mpl/min_max.hpp:
 
 /home/nhewko/local/include/deal.II/bundled/boost/parameter/binding.hpp:
+
+/home/nhewko/openifem_stuff/OpenIFEM/include/linear_elasticity.h:
 
 /home/nhewko/local/include/deal.II/dofs/dof_faces.h:
 
@@ -6185,6 +6289,8 @@ main.cpp:
 
 /home/nhewko/local/include/deal.II/fe/fe_values_extractors.h:
 
+/home/nhewko/local/include/deal.II/numerics/data_out.h:
+
 /home/nhewko/local/include/deal.II/bundled/boost/intrusive/detail/mpl.hpp:
 
 /home/nhewko/local/include/deal.II/bundled/boost/intrusive/detail/config_end.hpp:
@@ -6248,6 +6354,8 @@ main.cpp:
 /home/nhewko/local/include/deal.II/grid/tria_iterator_selector.h:
 
 /home/nhewko/local/include/deal.II/bundled/boost/math/tools/promotion.hpp:
+
+/home/nhewko/local/include/deal.II/numerics/matrix_tools.h:
 
 /home/nhewko/local/include/deal.II/bundled/boost/move/algo/detail/merge.hpp:
 
@@ -6744,6 +6852,8 @@ main.cpp:
 /home/nhewko/local/include/deal.II/hp/dof_handler.h:
 
 /home/nhewko/local/include/deal.II/dofs/dof_accessor.templates.h:
+
+/home/nhewko/local/include/deal.II/base/mg_level_object.h:
 
 /home/nhewko/local/include/deal.II/bundled/boost/geometry/algorithms/detail/touches/interface.hpp:
 
