@@ -1,3 +1,12 @@
+/* 
+Seemed interesting to implement when starting to set up simulation program, but upon closer inspection is not that useful
+Dimension Independent Programming (DIP) is supposed to assist with method generation that can handle both 2D and 3D objects
+Upon reflection of the project scope, DIP is not needed since the extent of dimensionless programming will only include
+importing the file and reading if it is 2d or 3d and extruding the 2d shape to 3d.
+
+Keeping this code for future reference
+*/
+
 //import dealII libraries
 #include <deal.II/grid/tria.h>
 #include <deal.II/grid/tria_accessor.h>
@@ -6,6 +15,9 @@
 #include <deal.II/grid/grid_tools.h>
 #include <deal.II/grid/grid_out.h>
 #include <deal.II/grid/grid_in.h>
+
+#include <deal.II/dofs/dof_handler.h>
+#include <deal.II/dofs/dof_tools.h>
 
 //import OpenIFEM libraries
 #include "parameters.h"
@@ -21,24 +33,42 @@
 
 using namespace dealii;
 
+//Vars in unnamed namespace to avoid reading from other files
+template <int dim>
+class Sim{
+public:
+  //extern template class Solid::LinearElasticity<dim>;
+  Sim();
+  int loadMesh(std::string meshName);
+  Triangulation<3> extrude();
+  int refine(int refinement);
+private:
+  //TODO change to dimension independent programming using <dim> (step 4)
+  Triangulation<dim> tria;
+  DoFHandler<dim>    dof_handler;
+  GridIn<dim> gridIn;
+  
+};
+
 namespace {
 const std::string squareMeshName = "squareMesh";
 const std::string vocalFoldMeshName = "vocalFold2D";
-const std::string cubeMeshName = "cubeMesh";
 const std::string meshPath = "meshes/";
-
-//define objects for both 2d and 3d mesh manipulation
-Triangulation<2> tria2d;
-Triangulation<3> tria3d;
-
-GridIn<2> gridIn2d;
-GridIn<3> gridIn3d;
+std::string paramsPath("parameters.prm");
 
 GridOut gridOut;
 }
 
+template <int dim>
+Sim<dim>::Sim()
+  : dof_handler(tria)
+{}
+
 //imports a mesh and outputs svg file in the XY plane
-int loadMesh(std::string meshName){
+template <int dim>
+int Sim<dim>::loadMesh(std::string meshName){
+  //define 2D GridIn object to receive 2d mesh
+  gridIn.attach_triangulation(tria);
   //identifies mesh to be imported from meshes folder
   std::ifstream f(meshPath + meshName + ".msh");
   //checks if desired mesh can be read
@@ -50,42 +80,55 @@ int loadMesh(std::string meshName){
     //return to kill the class
     return -1;
   }
-
-  //TODO write if statement to check if 2d or 3d mesh being imported, maybe try catch as 3d and have 2d in the catch segment and merge with extrude class?
-  //define 2D GridIn object to receive 2d mesh
-  gridIn2d.attach_triangulation(tria2d);
   //imports mesh from selected area
-  gridIn2d.read_msh(f);
-  //prepares squareMesh.svg file
-  std::ofstream out(meshName + ".svg");
-  //writes refined mesh to svg in XY plane
-  gridOut.write_svg(tria2d, out);
+  gridIn.read_msh(f);
   return 1;
 }
 
 //takes input 2d mesh from before and extrudes to a 3d shape, exports shape to .geo file
-int extrude(){  
+template <int dim>
+Triangulation<3> Sim<dim>::extrude(){
+  Triangulation<3> tria3d;  
   //2d input, number of slices, height, output height, output triangulation
-  GridGenerator::extrude_triangulation(tria2d, 7, 12.0, tria3d);
+  GridGenerator::extrude_triangulation(tria, 7, 12.0, tria3d);
   std::ofstream out(meshPath + "vocalFold3D.msh");
   gridOut.write_msh(tria3d, out);
-  return 1;
+  return tria3d;
 }
 
-int refine(int i){
+template <int dim>
+int Sim<dim>::refine(int refinement){
   //refine_global is set to 1 subdivision because mesh is subdivided from previous loop 
   //one further step into refinement
-  tria3d.refine_global(1);
-  //output the refined mesh with a different name based on refinement levevl
-  std::ofstream out(meshPath + "vocalFold3d" + std::to_string(i) + ".msh");
-  gridOut.write_msh(tria3d, out);
+  tria.refine_global(1);
+  //output the refined mesh with a different name based on refinement level
+  std::ofstream out(meshPath + "vocalFold3d" + std::to_string(refinement) + ".msh");
+  gridOut.write_msh(tria, out);
   return 1;
 }
 
 int main(){
-  loadMesh(squareMeshName);
-  extrude();
-  for(int i = 1; i <= 3; i++){
-    refine(i);
+  //read parameters file to determine the dimensions present
+  Parameters::AllParameters params(paramsPath);
+  
+  if (params.dimension == 2){
+    Sim<2> DIPTest;
+    DIPTest.loadMesh(vocalFoldMeshName);
+    //TODO do something with the returned extruded 3d mesh, maybe create a Sim<3> object?
+    DIPTest.extrude();
+    for(int i = 1; i <= 2; i++){
+      DIPTest.refine(i);
+    }  
+  } else if (params.dimension == 3){
+    Sim<3> DIPTest;
+    DIPTest.loadMesh(vocalFoldMeshName);
+    //no extrude since it is already 3d
+    for(int i = 1; i <= 2; i++){
+      DIPTest.refine(i);
+    }
+  } else {
+    std::cerr << "Cannot find dimension from parameters file" << std::endl
+              << "Check if " << paramsPath << "exists";
+    return 1;
   }
 }
