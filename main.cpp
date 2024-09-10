@@ -8,7 +8,10 @@
 #include <deal.II/grid/grid_in.h>
 
 //import OpenIFEM libraries
+//solid linear elastic solver
 #include "linear_elasticity.h"
+//fluid incompressible navier stokes solver
+#include "insim.h"
 #include "parameters.h"
 #include "utilities.h"
 
@@ -20,18 +23,25 @@
 #include <cmath>
 #include <map>
 
+//create solid objects
 extern template class Solid::LinearElasticity<2>;
 extern template class Solid::LinearElasticity<3>;
+//create fluid objects
+extern template class Fluid::InsIM<2>;
+extern template class Fluid::InsIM<3>;
+//fluid-solid interface objects
+extern template class FSI<2>;
+extern template class FSI<3>;
 
 using namespace dealii;
 
 namespace {
-const std::string squareMeshName = "squareMesh";
-const std::string vocalFoldMeshName = "vocalFold2D";
-const std::string cubeMeshName = "cubeMesh";
+const std::string simMeshName = "FSIChannel";
 const std::string meshPath = "meshes/";
-std::string paramsPath2d("parameters2d.prm");
-std::string paramsPath3d("parameters3d.prm");
+//TODO simplify parameters strings existing - leave to only 2d form for now?
+const std::string paramsPath2d = "parameters2d.prm";
+const std::string paramsPath3d = "parameters3d.prm";
+const std::string paramsPath = "parameters.prm";
 
 //define objects for both 2d and 3d mesh manipulation
 Triangulation<2> tria2d;
@@ -62,11 +72,12 @@ int loadMesh2d(std::string meshName){
   gridIn2d.attach_triangulation(tria2d);
   //imports mesh from selected area
   gridIn2d.read_msh(f);
+  
   //prepares squareMesh.svg file
-  std::ofstream out(meshName + ".svg");
+  //std::ofstream out(meshName + ".svg");
   //writes refined mesh to svg in XY plane
-  gridOut.write_svg(tria2d, out);
-  return 1;
+  //gridOut.write_svg(tria2d, out);
+  return 0;
 }
 
 //imports a 3D mesh and outputs svg file in the XY plane
@@ -89,27 +100,39 @@ int loadMesh3d(std::string meshName){
   //imports mesh from selected area
   gridIn3d.read_msh(f);
   
-  //prepares squareMesh.svg file
-  //std::ofstream out(meshName + ".svg");
   return 1;
 }
 
+
+//TODO merge solid and fluid importing parameters
 int importParams2d(std::string paramName){
     //import params from .prm file and assign to 2d square
-    Parameters::AllParameters params(paramName);
+    Parameters::AllParameters params(paramsPath);
     Solid::LinearElasticity<2> solid(tria2d, params);
-    solid.run();
+    Fluid::InsIM<2> fluid(tria2d, params);
+    FSI<2> fsi(fluid, solid, params, true);
+    fsi.run();
     
     return 0;
 }
 
 int importParams3d(std::string paramName){
     //import params from .prm file
-    Parameters::AllParameters params(paramName);
+    Parameters::AllParameters params(paramsPath);
     Solid::LinearElasticity<3> solid(tria3d, params);
     solid.run();
     
     return 0;
+}
+
+int importParams(){
+  Parameters::AllParameters params(paramsPath);
+  tria2d.refine_global(1);
+  Fluid::InsIM<2> flow(tria2d, params);
+  flow.run();
+  auto solution = flow.get_current_solution();
+
+  return 0;
 }
 
 //takes input 2d mesh from before and extrudes to a 3d shape, exports shape to .geo file
@@ -118,7 +141,7 @@ int extrude(){
   GridGenerator::extrude_triangulation(tria2d, 7, 12.0, tria3d);
   std::ofstream out(meshPath + "vocalFold3d.msh");
   gridOut.write_msh(tria3d, out);
-  return 1;
+  return 0;
 }
 
 int refine(int i){
@@ -128,36 +151,18 @@ int refine(int i){
   //output the refined mesh with a different name based on refinement levevl
   std::ofstream out(meshPath + "vocalFold3d" + std::to_string(i) + ".msh");
   gridOut.write_msh(tria3d, out);
-  return 1;
+  return 0;
 }
 
-//pulled from OpenIFEM Solid_beam_bending_linearelastic test
-int generateMesh(){
-  double L = 8.0, H = 1.0;
-  std::ofstream out(meshPath + "solid_beam_mesh.msh");
 
-  Parameters::AllParameters params("solid_beam_bending_linearelastic.prm");
-  
-  Triangulation<2> tria;
-          dealii::GridGenerator::subdivided_hyper_rectangle(
-            tria, {32, 4}, Point<2>(0, 0), Point<2>(L, H), true);
-  Solid::LinearElasticity<2> solidBeam(tria, params);
-  solidBeam.run();
-  return 1;
-}
 
 int main(){
-
-  loadMesh3d(cubeMeshName);
-  //generateMesh();
-  importParams3d(paramsPath3d);
-  
-  
-  //loadMesh2d(squareMeshName);
+  loadMesh(simMeshName);
+  //importParams();
   //extrude();
   //for(int i = 1; i <= 3; i++){
   //  refine(i);
   //}
-  //importParams2d(paramsPath2d);
+  importParams2d(paramsPath2d);
   
 }
