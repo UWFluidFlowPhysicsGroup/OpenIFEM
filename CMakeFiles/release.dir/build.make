@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/nhewko/openifem_stuff/simulations
+CMAKE_SOURCE_DIR = /home/nhewko/VocalFolds
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/nhewko/openifem_stuff/simulations
+CMAKE_BINARY_DIR = /home/nhewko/VocalFolds
 
 # Utility rule file for release.
 
@@ -67,8 +67,8 @@ include CMakeFiles/release.dir/compiler_depend.make
 include CMakeFiles/release.dir/progress.make
 
 CMakeFiles/release:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/nhewko/openifem_stuff/simulations/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Switching CMAKE_BUILD_TYPE to Release"
-	/usr/bin/cmake -DCMAKE_BUILD_TYPE=Release /home/nhewko/openifem_stuff/simulations
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/nhewko/VocalFolds/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Switching CMAKE_BUILD_TYPE to Release"
+	/usr/bin/cmake -DCMAKE_BUILD_TYPE=Release /home/nhewko/VocalFolds
 	/usr/bin/cmake -E echo "***"
 	/usr/bin/cmake -E echo "*** Switched to Release mode. Now recompile with:  \$$ make"
 	/usr/bin/cmake -E echo "***"
@@ -86,6 +86,6 @@ CMakeFiles/release.dir/clean:
 .PHONY : CMakeFiles/release.dir/clean
 
 CMakeFiles/release.dir/depend:
-	cd /home/nhewko/openifem_stuff/simulations && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/nhewko/openifem_stuff/simulations /home/nhewko/openifem_stuff/simulations /home/nhewko/openifem_stuff/simulations /home/nhewko/openifem_stuff/simulations /home/nhewko/openifem_stuff/simulations/CMakeFiles/release.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/nhewko/VocalFolds && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/nhewko/VocalFolds /home/nhewko/VocalFolds /home/nhewko/VocalFolds /home/nhewko/VocalFolds /home/nhewko/VocalFolds/CMakeFiles/release.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/release.dir/depend
 

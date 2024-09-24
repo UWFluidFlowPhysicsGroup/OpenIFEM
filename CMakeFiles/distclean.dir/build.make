@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/nhewko/openifem_stuff/simulations
+CMAKE_SOURCE_DIR = /home/nhewko/VocalFolds
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/nhewko/openifem_stuff/simulations
+CMAKE_BINARY_DIR = /home/nhewko/VocalFolds
 
 # Utility rule file for distclean.
 
@@ -67,9 +67,9 @@ include CMakeFiles/distclean.dir/compiler_depend.make
 include CMakeFiles/distclean.dir/progress.make
 
 CMakeFiles/distclean:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/nhewko/openifem_stuff/simulations/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "distclean invoked"
-	/usr/bin/cmake --build /home/nhewko/openifem_stuff/simulations --target clean
-	/usr/bin/cmake --build /home/nhewko/openifem_stuff/simulations --target runclean
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/nhewko/VocalFolds/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "distclean invoked"
+	/usr/bin/cmake --build /home/nhewko/VocalFolds --target clean
+	/usr/bin/cmake --build /home/nhewko/VocalFolds --target runclean
 	/usr/bin/cmake -E remove_directory CMakeFiles
 	/usr/bin/cmake -E remove CMakeCache.txt cmake_install.cmake Makefile build.ninja rules.ninja .ninja_deps .ninja_log
 
@@ -86,6 +86,6 @@ CMakeFiles/distclean.dir/clean:
 .PHONY : CMakeFiles/distclean.dir/clean
 
 CMakeFiles/distclean.dir/depend:
-	cd /home/nhewko/openifem_stuff/simulations && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/nhewko/openifem_stuff/simulations /home/nhewko/openifem_stuff/simulations /home/nhewko/openifem_stuff/simulations /home/nhewko/openifem_stuff/simulations /home/nhewko/openifem_stuff/simulations/CMakeFiles/distclean.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/nhewko/VocalFolds && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/nhewko/VocalFolds /home/nhewko/VocalFolds /home/nhewko/VocalFolds /home/nhewko/VocalFolds /home/nhewko/VocalFolds/CMakeFiles/distclean.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/distclean.dir/depend
 

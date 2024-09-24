@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/nhewko/openifem_stuff/simulations
+CMAKE_SOURCE_DIR = /home/nhewko/VocalFolds
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/nhewko/openifem_stuff/simulations
+CMAKE_BINARY_DIR = /home/nhewko/VocalFolds
 
 # Include any dependencies generated for this target.
 include CMakeFiles/main.dir/depend.make
@@ -72,16 +72,16 @@ include CMakeFiles/main.dir/flags.make
 CMakeFiles/main.dir/main.cpp.o: CMakeFiles/main.dir/flags.make
 CMakeFiles/main.dir/main.cpp.o: main.cpp
 CMakeFiles/main.dir/main.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/nhewko/openifem_stuff/simulations/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/main.dir/main.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/main.cpp.o -MF CMakeFiles/main.dir/main.cpp.o.d -o CMakeFiles/main.dir/main.cpp.o -c /home/nhewko/openifem_stuff/simulations/main.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/nhewko/VocalFolds/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/main.dir/main.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/main.cpp.o -MF CMakeFiles/main.dir/main.cpp.o.d -o CMakeFiles/main.dir/main.cpp.o -c /home/nhewko/VocalFolds/main.cpp
 
 CMakeFiles/main.dir/main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/main.dir/main.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/nhewko/openifem_stuff/simulations/main.cpp > CMakeFiles/main.dir/main.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/nhewko/VocalFolds/main.cpp > CMakeFiles/main.dir/main.cpp.i
 
 CMakeFiles/main.dir/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/main.dir/main.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/nhewko/openifem_stuff/simulations/main.cpp -o CMakeFiles/main.dir/main.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/nhewko/VocalFolds/main.cpp -o CMakeFiles/main.dir/main.cpp.s
 
 # Object files for target main
 main_OBJECTS = \
@@ -92,22 +92,36 @@ main_EXTERNAL_OBJECTS =
 
 main: CMakeFiles/main.dir/main.cpp.o
 main: CMakeFiles/main.dir/build.make
-main: /home/nhewko/local/lib/libdeal_II.g.so.9.3.3
-main: /home/nhewko/openifem_stuff/OpenIFEM/build/lib/libopenifem.so
-main: /usr/lib/x86_64-linux-gnu/libmpichcxx.so
+main: /home/nhewko/OpenIFEM-dependencies/build_dealii/lib/libdeal_II.so.9.4.1
+main: /home/nhewko/OpenIFEM/OpenIFEM-build/lib/libopenifem.so
+main: /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi_cxx.so
+main: /home/nhewko/OpenIFEM-dependencies/metis-5.1.0/build/Linux-x86_64/libmetis/libmetis.a
+main: /home/nhewko/OpenIFEM-dependencies/petsc-3.16.6/x86_64/lib/libpetsc.so
+main: /home/nhewko/OpenIFEM-dependencies/petsc-3.16.6/x86_64/lib/libHYPRE.so
+main: /home/nhewko/OpenIFEM-dependencies/petsc-3.16.6/x86_64/lib/libcmumps.a
+main: /home/nhewko/OpenIFEM-dependencies/petsc-3.16.6/x86_64/lib/libdmumps.a
+main: /home/nhewko/OpenIFEM-dependencies/petsc-3.16.6/x86_64/lib/libsmumps.a
+main: /home/nhewko/OpenIFEM-dependencies/petsc-3.16.6/x86_64/lib/libzmumps.a
+main: /home/nhewko/OpenIFEM-dependencies/petsc-3.16.6/x86_64/lib/libmumps_common.a
+main: /home/nhewko/OpenIFEM-dependencies/petsc-3.16.6/x86_64/lib/libpord.a
+main: /home/nhewko/OpenIFEM-dependencies/petsc-3.16.6/x86_64/lib/libscalapack.a
+main: /usr/lib/x86_64-linux-gnu/libmpi_usempif08.so
+main: /usr/lib/x86_64-linux-gnu/libmpi_usempi_ignore_tkr.so
+main: /usr/lib/x86_64-linux-gnu/libmpi_mpifh.so
+main: /usr/lib/x86_64-linux-gnu/libmpi.so
+main: /usr/lib/x86_64-linux-gnu/libopen-rte.so
+main: /usr/lib/x86_64-linux-gnu/libopen-pal.so
+main: /usr/lib/x86_64-linux-gnu/libhwloc.so
+main: /usr/lib/x86_64-linux-gnu/libevent_core.so
+main: /usr/lib/x86_64-linux-gnu/libevent_pthreads.so
 main: /usr/lib/x86_64-linux-gnu/libz.so
-main: /home/nhewko/local/lib/libmetis.so
-main: /home/nhewko/local/lib/libpetsc.so
-main: /home/nhewko/local/lib/libHYPRE.so
-main: /home/nhewko/local/lib/libscalapack.a
-main: /usr/lib/x86_64-linux-gnu/libmpichfort.so
-main: /home/nhewko/local/lib/libp4est.so
-main: /home/nhewko/local/lib/libsc.so
+main: /root/local/lib/libp4est.so
+main: /root/local/lib/libsc.so
 main: /usr/lib/x86_64-linux-gnu/liblapack.so
 main: /usr/lib/x86_64-linux-gnu/libblas.so
-main: /usr/lib/x86_64-linux-gnu/libmpich.so
+main: /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi.so
 main: CMakeFiles/main.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/nhewko/openifem_stuff/simulations/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable main"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/nhewko/VocalFolds/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable main"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/main.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -119,6 +133,6 @@ CMakeFiles/main.dir/clean:
 .PHONY : CMakeFiles/main.dir/clean
 
 CMakeFiles/main.dir/depend:
-	cd /home/nhewko/openifem_stuff/simulations && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/nhewko/openifem_stuff/simulations /home/nhewko/openifem_stuff/simulations /home/nhewko/openifem_stuff/simulations /home/nhewko/openifem_stuff/simulations /home/nhewko/openifem_stuff/simulations/CMakeFiles/main.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/nhewko/VocalFolds && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/nhewko/VocalFolds /home/nhewko/VocalFolds /home/nhewko/VocalFolds /home/nhewko/VocalFolds /home/nhewko/VocalFolds/CMakeFiles/main.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/main.dir/depend
 

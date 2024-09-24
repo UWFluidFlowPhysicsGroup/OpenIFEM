@@ -4,14 +4,14 @@
 
 
 # Configuration directories and files
-SourceDirectory: /home/nhewko/openifem_stuff/simulations
-BuildDirectory: /home/nhewko/openifem_stuff/simulations
+SourceDirectory: /home/nhewko/VocalFolds
+BuildDirectory: /home/nhewko/VocalFolds
 
 # Where to place the cost data store
 CostDataFile: 
 
 # Site is something like machine.domain, i.e. pragmatic.crd
-Site: Impreza-GDB
+Site: fluidpc107
 
 # Build name is osname-revision-compiler, i.e. Linux-2.4.2-2smp-c++
 BuildName: Linux-c++
@@ -26,7 +26,7 @@ SubmitURL: http://
 NightlyStartTime: 00:00:00 EDT
 
 # Commands for the build/test/submit cycle
-ConfigureCommand: "/usr/bin/cmake" "/home/nhewko/openifem_stuff/simulations"
+ConfigureCommand: "/usr/bin/cmake" "/home/nhewko/VocalFolds"
 MakeCommand: /usr/bin/cmake --build . --config "${CTEST_CONFIGURATION_TYPE}"
 DefaultCTestConfigurationType: Release
 

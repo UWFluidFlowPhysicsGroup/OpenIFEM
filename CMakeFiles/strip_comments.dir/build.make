@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/nhewko/openifem_stuff/simulations
+CMAKE_SOURCE_DIR = /home/nhewko/VocalFolds
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/nhewko/openifem_stuff/simulations
+CMAKE_BINARY_DIR = /home/nhewko/VocalFolds
 
 # Utility rule file for strip_comments.
 
@@ -67,7 +67,7 @@ include CMakeFiles/strip_comments.dir/compiler_depend.make
 include CMakeFiles/strip_comments.dir/progress.make
 
 CMakeFiles/strip_comments:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/nhewko/openifem_stuff/simulations/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "strip comments"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/nhewko/VocalFolds/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "strip comments"
 	/usr/bin/perl -pi -e 's#^[ \t]*//.*\n##g;' main.cpp
 
 strip_comments: CMakeFiles/strip_comments
@@ -83,6 +83,6 @@ CMakeFiles/strip_comments.dir/clean:
 .PHONY : CMakeFiles/strip_comments.dir/clean
 
 CMakeFiles/strip_comments.dir/depend:
-	cd /home/nhewko/openifem_stuff/simulations && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/nhewko/openifem_stuff/simulations /home/nhewko/openifem_stuff/simulations /home/nhewko/openifem_stuff/simulations /home/nhewko/openifem_stuff/simulations /home/nhewko/openifem_stuff/simulations/CMakeFiles/strip_comments.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/nhewko/VocalFolds && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/nhewko/VocalFolds /home/nhewko/VocalFolds /home/nhewko/VocalFolds /home/nhewko/VocalFolds /home/nhewko/VocalFolds/CMakeFiles/strip_comments.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/strip_comments.dir/depend
 

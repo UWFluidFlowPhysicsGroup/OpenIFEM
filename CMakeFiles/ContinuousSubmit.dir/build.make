@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/nhewko/openifem_stuff/simulations
+CMAKE_SOURCE_DIR = /home/nhewko/VocalFolds
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/nhewko/openifem_stuff/simulations
+CMAKE_BINARY_DIR = /home/nhewko/VocalFolds
 
 # Utility rule file for ContinuousSubmit.
 
@@ -82,6 +82,6 @@ CMakeFiles/ContinuousSubmit.dir/clean:
 .PHONY : CMakeFiles/ContinuousSubmit.dir/clean
 
 CMakeFiles/ContinuousSubmit.dir/depend:
-	cd /home/nhewko/openifem_stuff/simulations && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/nhewko/openifem_stuff/simulations /home/nhewko/openifem_stuff/simulations /home/nhewko/openifem_stuff/simulations /home/nhewko/openifem_stuff/simulations /home/nhewko/openifem_stuff/simulations/CMakeFiles/ContinuousSubmit.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/nhewko/VocalFolds && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/nhewko/VocalFolds /home/nhewko/VocalFolds /home/nhewko/VocalFolds /home/nhewko/VocalFolds /home/nhewko/VocalFolds/CMakeFiles/ContinuousSubmit.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/ContinuousSubmit.dir/depend
 

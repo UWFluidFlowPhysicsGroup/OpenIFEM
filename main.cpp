@@ -25,6 +25,7 @@
 #include <string>
 #include <cmath>
 #include <map>
+#include <filesystem>
 
 //create solid objects
 extern template class Solid::LinearElasticity<2>;
@@ -41,7 +42,7 @@ using namespace dealii;
 namespace {
 const std::string simMeshName = "FSIChannel";
 const std::string simMeshSolid = "FSIChannelSolid";
-const std::string simMeshFluid = "FSIChannelFluid";
+const std::string simMeshFluid = "FSIChannelFluid2";
 const std::string meshPath = "meshes/";
 //TODO simplify parameters strings existing - leave to only 2d form for now?
 const std::string paramsPath2d = "parameters2d.prm";
@@ -76,6 +77,7 @@ int loadMesh2d(std::string meshNameSolid, std::string meshNameFluid){
     return -1;
   }
 
+
   //TODO write if statement to check if 2d or 3d mesh being imported, maybe try catch as 3d and have 2d in the catch segment and merge with extrude class?
   //define 2D GridIn object to receive 2d mesh
   gridIn2d.attach_triangulation(tria2dSolid);
@@ -85,12 +87,27 @@ int loadMesh2d(std::string meshNameSolid, std::string meshNameFluid){
   //repeat same for fluid mesh
   gridIn2d.attach_triangulation(tria2dFluid);
   gridIn2d.read_msh(fluidPath);
+  
+  std::cout << std::filesystem::current_path();
 
   //prepares squareMesh.svg file
   //std::ofstream out(meshName + ".svg");
   //writes refined mesh to svg in XY plane
   //gridOut.write_svg(tria2d, out);
   return 0;
+}
+
+int importParams2d(std::string paramName){
+    //import params from .prm file and assign to 2d square
+    Parameters::AllParameters params(paramName);
+    //import params for both solid and fluid meshes separately
+    Solid::LinearElasticity<2> solid(tria2dSolid, params);
+    Fluid::InsIM<2> fluid(tria2dFluid, params);
+    //combine solid and fluid meshes to make FSI simulation
+    FSI<2> fsi(fluid, solid, params, true);
+    fsi.run();
+    
+    return 0;
 }
 
 /*
@@ -117,21 +134,6 @@ int loadMesh3d(std::string meshName){
   
   return 1;
 }
-*/
-
-//TODO merge solid and fluid importing parameters
-int importParams2d(std::string paramName){
-    //import params from .prm file and assign to 2d square
-    Parameters::AllParameters params(paramName);
-    //import params for both solid and fluid meshes separately
-    Solid::LinearElasticity<2> solid(tria2dSolid, params);
-    Fluid::InsIM<2> fluid(tria2dFluid, params);
-    //combine solid and fluid meshes to make FSI simulation
-    FSI<2> fsi(fluid, solid, params, true);
-    fsi.run();
-    
-    return 0;
-}
 
 int importParams3d(std::string paramName){
     //import params from .prm file
@@ -142,16 +144,6 @@ int importParams3d(std::string paramName){
     fsi.run();
     
     return 0;
-}
-/*
-int importParams(){
-  Parameters::AllParameters params(paramsPath);
-  tria2d.refine_global(1);
-  Fluid::InsIM<2> flow(tria2dFluid, params);
-  flow.run();
-  auto solution = flow.get_current_solution();
-
-  return 0;
 }
 */
 
@@ -180,11 +172,10 @@ int refine(int i){
 
 int main(){
   loadMesh2d(simMeshSolid, simMeshFluid);
-  //importParams();
+  //importParams2d(paramsPath2d);
+  
   //extrude();
   //for(int i = 1; i <= 3; i++){
   //  refine(i);
   //}
-  importParams2d(paramsPath2d);
-  
 }
