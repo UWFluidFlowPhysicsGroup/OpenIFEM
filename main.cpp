@@ -41,8 +41,8 @@ using namespace dealii;
 
 namespace {
 const std::string simMeshName = "FSIChannel";
-const std::string simMeshSolid = "FSIChannelSolid";
-const std::string simMeshFluid = "FSIChannelFluid2";
+const std::string simMeshSolid = "FSIChannelSolid_0.02mm";
+const std::string simMeshFluid = "FSIChannelFluid3";
 const std::string meshPath = "meshes/";
 //TODO simplify parameters strings existing - leave to only 2d form for now?
 const std::string paramsPath2d = "parameters2d.prm";
@@ -88,7 +88,7 @@ int loadMesh2d(std::string meshNameSolid, std::string meshNameFluid){
   gridIn2d.attach_triangulation(tria2dFluid);
   gridIn2d.read_msh(fluidPath);
   
-  std::cout << std::filesystem::current_path();
+  //std::cout << std::filesystem::current_path();
 
   //prepares squareMesh.svg file
   //std::ofstream out(meshName + ".svg");
@@ -172,7 +172,7 @@ int refine(int i){
 
 int main(){
   loadMesh2d(simMeshSolid, simMeshFluid);
-  //importParams2d(paramsPath2d);
+  importParams2d(paramsPath2d);
   
   //extrude();
   //for(int i = 1; i <= 3; i++){
