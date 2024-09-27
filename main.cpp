@@ -40,14 +40,12 @@ extern template class FSI<3>;
 using namespace dealii;
 
 namespace {
-const std::string simMeshName = "FSIChannel";
-const std::string simMeshSolid = "FSIChannelSolid_0.02mm";
+const std::string simMeshSolid = "FSIChannelSolid";
 const std::string simMeshFluid = "FSIChannelFluid3";
 const std::string meshPath = "meshes/";
 //TODO simplify parameters strings existing - leave to only 2d form for now?
 const std::string paramsPath2d = "parameters2d.prm";
 const std::string paramsPath3d = "parameters3d.prm";
-const std::string paramsPath = "parameters.prm";
 
 //define objects for both 2d and 3d mesh manipulation
 Triangulation<2> tria2dFluid;
