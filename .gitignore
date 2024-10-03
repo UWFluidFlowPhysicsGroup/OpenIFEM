@@ -1,4 +1,14 @@
-/meshes/*
+/meshes/*.STEP
+/meshes/*.SLDPRT
 *.Identifier
 notes.md
 *.svg
+*.vtu
+*.pvd
+
+# files that are created when interrupting a program or when it crashes, not needed and just annoying to deal with
+/CMakeFiles/Progress/*
+/CMakeFiles/main.dir/main.cpp.o
+/CMakeFiles/main.dir/main.cpp.o.d
+/CMakeFiles/main.dir/compiler_depend.internal
+
