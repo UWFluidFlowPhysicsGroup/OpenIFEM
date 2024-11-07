@@ -1,17 +1,15 @@
 MESSAGE(
 "###
 #
-#  Project  main  set up with  deal.II-9.3.3  found at
-#      /home/nhewko/local
+#  Project  main  set up with  deal.II-9.4.1  found at
+#      /home/nhewko/OpenIFEM-dependencies/build_dealii
 #
-#  CMAKE_BUILD_TYPE:          Debug
+#  CMAKE_BUILD_TYPE:          Release
 #
 #  You can now run
 #       $ make                - to compile and link the program
 #       $ make run            - to (compile, link and) run the program
 #
-#       $ make debug          - to switch the build type to 'Debug'
-#       $ make release        - to switch the build type to 'Release'
 #
 #       $ make edit_cache     - to change (cached) configuration variables
 #                               and rerun the configure and generate phases of CMake
