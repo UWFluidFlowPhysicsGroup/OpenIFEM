@@ -1,12 +1,3 @@
-/* 
-Seemed interesting to implement when starting to set up simulation program, but upon closer inspection is not that useful
-Dimension Independent Programming (DIP) is supposed to assist with method generation that can handle both 2D and 3D objects
-Upon reflection of the project scope, DIP is not needed since the extent of dimensionless programming will only include
-importing the file and reading if it is 2d or 3d and extruding the 2d shape to 3d.
-
-Keeping this code for future reference
-*/
-
 //import dealII libraries
 #include <deal.II/grid/tria.h>
 #include <deal.II/grid/tria_accessor.h>
