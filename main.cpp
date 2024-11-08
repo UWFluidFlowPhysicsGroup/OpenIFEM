@@ -123,25 +123,26 @@ int main(){
   
   //iterate through each fluid mesh that was given
   for(const std::string &meshFluid : simMeshFluid){
-    //DIPTest dimension-independent code
+    //This section has to be hard coded, since the creation of the Sim object requires a constant variable input
+    //the value of ‘dims’ is not usable in a constant expression
     if (params.dimension == 2){
-      Sim<2> DIPTest;
-      DIPTest.loadMesh(simMeshSolid, meshFluid);
-      DIPTest.setParams(params);
+      Sim<2> sim;
+      sim.loadMesh(simMeshSolid, meshFluid);
+      sim.setParams(params);
 
       /*Keeping extrude and refine functions commented out for future reference
-      DIPTest.extrude();
+      sim.extrude();
       for(int i = 1; i <= 2; i++){
-        DIPTest.refine(i);
+        sim.refine(i);
       } */ 
     } else if (params.dimension == 3){
-      Sim<3> DIPTest;
-      DIPTest.loadMesh(simMeshSolid, meshFluid);
-      DIPTest.setParams(params);
+      Sim<3> sim;
+      sim.loadMesh(simMeshSolid, meshFluid);
+      sim.setParams(params);
       
       /*
       for(int i = 1; i <= 2; i++){
-        DIPTest.refine(i);
+        sim.refine(i);
       }*/
     } else {
       std::cerr << "Cannot find dimension from parameters file" << std::endl
