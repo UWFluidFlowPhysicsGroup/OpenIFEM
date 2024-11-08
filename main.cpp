@@ -15,7 +15,6 @@ Keeping this code for future reference
 #include <deal.II/grid/grid_tools.h>
 #include <deal.II/grid/grid_out.h>
 #include <deal.II/grid/grid_in.h>
-
 #include <deal.II/dofs/dof_handler.h>
 #include <deal.II/dofs/dof_tools.h>
 
@@ -26,10 +25,8 @@ Keeping this code for future reference
 #include "insim.h"
 //fluid-solid interface solver
 #include "fsi.h"
-
 #include "parameters.h"
 #include "utilities.h"
-
 
 //import c++ libraries
 #include <iostream>
@@ -58,36 +55,28 @@ public:
   //extern template class Solid::LinearElasticity<dim>;
   Sim();
   int loadMesh(std::string meshNameSolid, std::string meshNameFluid);
-  int setParams(std::string paramName);
+  int setParams(Parameters::AllParameters params);
   Triangulation<3> extrude();
   int refine(int refinement);
 private:
-  //TODO change to dimension independent programming using <dim> (step 4)
-  Triangulation<dim> triaSolid;
-  Triangulation<dim> triaFluid;
-  DoFHandler<dim>    dof_handler;
+  Triangulation<dim> triaSolid, triaFluid;
+  DoFHandler<dim> dof_handler;
   GridIn<dim> gridIn;
-  Solid::LinearElasticity<dim> solid;
-  Fluid::InsIM<dim> fluid;
 };
 
 namespace {
-
-//new variables from main
 const std::string simMeshSolid = "leafletSolid";
 //Ability to set multiple fluid meshes to simplify fluid mesh refinement studies
 const std::string simMeshFluid[] = {"leafletFluid_1799"};
 const std::string meshPath = "meshes/";
-const std::string paramsPath = "parameters.prm";
-//const std::string paramsPath2d = "parameters2d.prm";
-//const std::string paramsPath3d = "parameters3d.prm";
+const std::string paramsPath = "fsi_leaflet.prm";
 GridOut gridOut;
 }
 
-///home/nhewko/VocalFolds/main.cpp:89:5: error: no matching function for call to ‘dealii::DoFHandler<2, 2>::DoFHandler(dealii::Triangulation<2, 2>&, dealii::Triangulation<2, 2>&, Solid::LinearElasticity<2>&, Fluid::InsIM<2>&)’
+//only need to define dof_handler once for the sim dimensions, i guess this is how it reads what dim to use?
 template <int dim>
 Sim<dim>::Sim()
-  : dof_handler(triaSolid)
+  : dof_handler(triaSolid) 
 {}
 
 //imports a mesh and outputs svg file in the XY plane
@@ -125,11 +114,8 @@ int Sim<dim>::loadMesh(std::string meshNameSolid, std::string meshNameFluid){
   return 0;
 }
 
-//TODO make dimensionless for running either 2d or 3d meshes, also rename to "runSim" or something since parameters are already loaded
-//int Sim<dim>::setParams(std::string paramName){
 template <int dim>
-int Sim<dim>::setParams(std::string paramName){
-  Parameters::AllParameters params(paramsPath);
+int Sim<dim>::setParams(Parameters::AllParameters params){
   //import params for both solid and fluid meshes separately
   Solid::LinearElasticity<dim> solid(triaSolid, params);
   Fluid::InsIM<dim> fluid(triaFluid, params);
@@ -150,10 +136,9 @@ int main(){
     if (params.dimension == 2){
       Sim<2> DIPTest;
       DIPTest.loadMesh(simMeshSolid, meshFluid);
-      //TODO define params in setParams without having to resend/redefine paramsPath
-      DIPTest.setParams(paramsPath);
+      DIPTest.setParams(params);
 
-      /*//TODO do something with the returned extruded 3d mesh, maybe create a Sim<3> object?
+      /*Keeping extrude and refine functions commented out for future reference
       DIPTest.extrude();
       for(int i = 1; i <= 2; i++){
         DIPTest.refine(i);
@@ -161,9 +146,9 @@ int main(){
     } else if (params.dimension == 3){
       Sim<3> DIPTest;
       DIPTest.loadMesh(simMeshSolid, meshFluid);
-      DIPTest.setParams(paramsPath);
+      DIPTest.setParams(params);
       
-      /*//no extrude since it is already 3d
+      /*
       for(int i = 1; i <= 2; i++){
         DIPTest.refine(i);
       }*/
