@@ -98,12 +98,6 @@ main: /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi_cxx.so
 main: /home/nhewko/OpenIFEM-dependencies/metis-5.1.0/build/Linux-x86_64/libmetis/libmetis.a
 main: /home/nhewko/OpenIFEM-dependencies/petsc-3.16.6/x86_64/lib/libpetsc.so
 main: /home/nhewko/OpenIFEM-dependencies/petsc-3.16.6/x86_64/lib/libHYPRE.so
-main: /home/nhewko/OpenIFEM-dependencies/petsc-3.16.6/x86_64/lib/libcmumps.a
-main: /home/nhewko/OpenIFEM-dependencies/petsc-3.16.6/x86_64/lib/libdmumps.a
-main: /home/nhewko/OpenIFEM-dependencies/petsc-3.16.6/x86_64/lib/libsmumps.a
-main: /home/nhewko/OpenIFEM-dependencies/petsc-3.16.6/x86_64/lib/libzmumps.a
-main: /home/nhewko/OpenIFEM-dependencies/petsc-3.16.6/x86_64/lib/libmumps_common.a
-main: /home/nhewko/OpenIFEM-dependencies/petsc-3.16.6/x86_64/lib/libpord.a
 main: /home/nhewko/OpenIFEM-dependencies/petsc-3.16.6/x86_64/lib/libscalapack.a
 main: /usr/lib/x86_64-linux-gnu/libmpi.so
 main: /root/local/lib/libp4est.so

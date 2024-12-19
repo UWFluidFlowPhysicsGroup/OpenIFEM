@@ -6,6 +6,8 @@
 #include <deal.II/grid/grid_tools.h>
 #include <deal.II/grid/grid_out.h>
 #include <deal.II/grid/grid_in.h>
+#include <deal.II/dofs/dof_handler.h>
+#include <deal.II/dofs/dof_tools.h>
 
 //import OpenIFEM libraries
 //solid linear elastic solver
@@ -14,10 +16,8 @@
 #include "insim.h"
 //fluid-solid interface solver
 #include "fsi.h"
-
 #include "parameters.h"
 #include "utilities.h"
-
 
 //import c++ libraries
 #include <iostream>
@@ -39,30 +39,40 @@ extern template class FSI<3>;
 
 using namespace dealii;
 
+//Vars in unnamed namespace to avoid reading from other files
+template <int dim>
+class Sim{
+public:
+  //extern template class Solid::LinearElasticity<dim>;
+  Sim();
+  int loadMesh(std::string meshNameSolid, std::string meshNameFluid);
+  int setParams(Parameters::AllParameters params);
+  Triangulation<3> extrude();
+  int refine(int refinement);
+private:
+  Triangulation<dim> triaSolid, triaFluid;
+  DoFHandler<dim> dof_handler;
+  GridIn<dim> gridIn;
+};
+
 namespace {
-const std::string simMeshSolid = "FSIChannelSolid";
+const std::string simMeshSolid = "leafletSolid";
 //Ability to set multiple fluid meshes to simplify fluid mesh refinement studies
-const std::string simMeshFluid[] = {"FSIChannelFluid3"};
+const std::string simMeshFluid[] = {"leafletFluid_1799"};
 const std::string meshPath = "meshes/";
-//TODO simplify parameters strings existing - leave to only 2d form for now?
-const std::string paramsPath2d = "parameters2d.prm";
-const std::string paramsPath3d = "parameters3d.prm";
-
-//define objects for both 2d and 3d mesh manipulation
-Triangulation<2> tria2dFluid;
-Triangulation<3,3> tria3dFluid;
-
-Triangulation<2> tria2dSolid;
-Triangulation<3,3> tria3dSolid;
-
-GridIn<2> gridIn2d;
-GridIn<3> gridIn3d;
-
+const std::string paramsPath = "fsi_leaflet.prm";
 GridOut gridOut;
 }
 
+//only need to define dof_handler once for the sim dimensions, i guess this is how it reads what dim to use?
+template <int dim>
+Sim<dim>::Sim()
+  : dof_handler(triaSolid) 
+{}
+
 //imports a mesh and outputs svg file in the XY plane
-int loadMesh2d(std::string meshNameSolid, std::string meshNameFluid){
+template <int dim>
+int Sim<dim>::loadMesh(std::string meshNameSolid, std::string meshNameFluid){
   //identifies mesh to be imported from meshes folder
   std::ifstream solidPath(meshPath + meshNameSolid + ".msh");
   std::ifstream fluidPath(meshPath + meshNameFluid + ".msh");
@@ -73,110 +83,74 @@ int loadMesh2d(std::string meshNameSolid, std::string meshNameFluid){
               << "ERROR FINDING MESH FILES " << meshNameSolid << " OR " << meshNameFluid
               << "----------------------------------------------------";
     //return to kill the class
-    return -1;
+    return 1;
   }
 
-
-  //TODO write if statement to check if 2d or 3d mesh being imported, maybe try catch as 3d and have 2d in the catch segment and merge with extrude class?
-  //define 2D GridIn object to receive 2d mesh
-  gridIn2d.attach_triangulation(tria2dSolid);
+  //define GridIn object to receive 2d mesh
+  gridIn.attach_triangulation(triaSolid);
   //imports mesh from selected area
-  gridIn2d.read_msh(solidPath);
+  gridIn.read_msh(solidPath);
   
   //repeat same for fluid mesh
-  gridIn2d.attach_triangulation(tria2dFluid);
-  gridIn2d.read_msh(fluidPath);
+  gridIn.attach_triangulation(triaFluid);
+  gridIn.read_msh(fluidPath);
+
+  //Exports meshes to .msh file for debugging
+  /*
+  std::ofstream out(meshNameSolid + ".msh");
+  std::ofstream out(meshNameFluid + ".msh");
+  gridOut.write_msh(triaSolid, out);
+  gridOut.write_msh(triaFluid, out);
+  */
+  return 0;
+}
+
+template <int dim>
+int Sim<dim>::setParams(Parameters::AllParameters params){
+  //import params for both solid and fluid meshes separately
+  Solid::LinearElasticity<dim> solid(triaSolid, params);
+  Fluid::InsIM<dim> fluid(triaFluid, params);
+  //combine solid and fluid meshes to make FSI simulation
+  FSI<dim> fsi(fluid, solid, params, true);
+  fsi.run();
   
-  //std::cout << std::filesystem::current_path();
-
-  //prepares squareMesh.svg file
-  //std::ofstream out(meshName + ".svg");
-  //writes refined mesh to svg in XY plane
-  //gridOut.write_svg(tria2d, out);
   return 0;
 }
-
-int importParams2d(std::string paramName){
-    //import params from .prm file and assign to 2d square
-    Parameters::AllParameters params(paramName);
-    //import params for both solid and fluid meshes separately
-    Solid::LinearElasticity<2> solid(tria2dSolid, params);
-    Fluid::InsIM<2> fluid(tria2dFluid, params);
-    //combine solid and fluid meshes to make FSI simulation
-    FSI<2> fsi(fluid, solid, params, true);
-    fsi.run();
-    
-    return 0;
-}
-
-/*
-Commenting out because focusing on 2d mesh for now
-//imports a 3D mesh and outputs svg file in the XY plane
-int loadMesh3d(std::string meshName){
-  //identifies mesh to be imported from meshes folder
-  std::ifstream f(meshPath + meshName + ".msh");
-  //checks if desired mesh can be read
-  if (!f){
-    //Display error handler that file cannot be found
-    std::cerr << "----------------------------------------------------"
-              << "ERROR FINDING MESH FILE " << meshName
-              << "----------------------------------------------------";
-    //return to kill the class
-    return -1;
-  }
-
-  //TODO write if statement to check if 2d or 3d mesh being imported, maybe try catch as 3d and have 2d in the catch segment and merge with extrude class?
-  //define 2D GridIn object to receive 2d mesh
-  gridIn3d.attach_triangulation(tria3d);
-  //imports mesh from selected area
-  gridIn3d.read_msh(f);
-  
-  return 1;
-}
-
-int importParams3d(std::string paramName){
-    //import params from .prm file
-    Parameters::AllParameters params(paramName);
-    Solid::LinearElasticity<3> solid(tria3dSolid, params);
-    Fluid::InsIM<3> fluid(tria3dFluid, params);
-    FSI<3> fsi(fluid, solid, params, true);
-    fsi.run();
-    
-    return 0;
-}
-*/
-
-/*
-Commented out extrude and refine functions because focusing on 2d shape first and refining in gmsh instead of c++ dealii
-//takes input 2d mesh from before and extrudes to a 3d shape, exports shape to .geo file
-int extrude(){  
-  //2d input, number of slices, height, output height, output triangulation
-  GridGenerator::extrude_triangulation(tria2d, 7, 12.0, tria3d);
-  std::ofstream out(meshPath + "vocalFold3d.msh");
-  gridOut.write_msh(tria3d, out);
-  return 0;
-}
-
-int refine(int i){
-  //refine_global is set to 1 subdivision because mesh is subdivided from previous loop 
-  //one further step into refinement
-  tria3d.refine_global(1);
-  //output the refined mesh with a different name based on refinement levevl
-  std::ofstream out(meshPath + "vocalFold3d" + std::to_string(i) + ".msh");
-  gridOut.write_msh(tria3d, out);
-  return 0;
-}
-*/
 
 
 int main(){
+  //read parameters file to determine the dimensions present
+  Parameters::AllParameters params(paramsPath);
+  
   //iterate through each fluid mesh that was given
-  for(const string &meshFluid : simMeshFluid){
-    //load meshes through loadMesh class
-    loadMesh2d(simMeshSolid, meshFluid);
-    //import parameters through importParams class
-    importParams2d(paramsPath2d);
-    
+  for(const std::string &meshFluid : simMeshFluid){
+    //This section has to be hard coded, since the creation of the Sim object requires a constant variable input
+    //the value of ‘dims’ is not usable in a constant expression
+    if (params.dimension == 2){
+      Sim<2> sim;
+      sim.loadMesh(simMeshSolid, meshFluid);
+      sim.setParams(params);
+
+      /*Keeping extrude and refine functions commented out for future reference
+      sim.extrude();
+      for(int i = 1; i <= 2; i++){
+        sim.refine(i);
+      } */ 
+    } else if (params.dimension == 3){
+      Sim<3> sim;
+      sim.loadMesh(simMeshSolid, meshFluid);
+      sim.setParams(params);
+      
+      /*
+      for(int i = 1; i <= 2; i++){
+        sim.refine(i);
+      }*/
+    } else {
+      std::cerr << "Cannot find dimension from parameters file" << std::endl
+                << "Check if " << paramsPath << "exists";
+      return 1;
+    }
+
     //define path to current file location
     std::filesystem::path p = std::filesystem::current_path();
     //create folder with a title corresponding to the current fluid mesh name
@@ -193,3 +167,28 @@ int main(){
     }
   }
 }
+
+/*
+Commented out extrude and refine functions because focusing on 2d shape first and refining in gmsh instead of c++ dealii
+//takes input 2d mesh from before and extrudes to a 3d shape, exports shape to .geo file
+template <int dim>
+Triangulation<3> Sim<dim>::extrude(){
+  Triangulation<3> tria3d;  
+  //2d input, number of slices, height, output height, output triangulation
+  GridGenerator::extrude_triangulation(tria2d, 7, 12.0, tria3d);
+  std::ofstream out(meshPath + "vocalFold3d.msh");
+  gridOut.write_msh(tria3d, out);
+  return 0;
+}
+
+template <int dim>
+int Sim<dim>::refine(int refinement){
+  //refine_global is set to 1 subdivision because mesh is subdivided from previous loop 
+  //one further step into refinement
+  tria.refine_global(1);
+  //output the refined mesh with a different name based on refinement level
+  std::ofstream out(meshPath + "vocalFold3d" + std::to_string(refinement) + ".msh");
+  gridOut.write_msh(tria, out);
+  return 0;
+}
+*/
