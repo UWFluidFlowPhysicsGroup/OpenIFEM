@@ -8,11 +8,7 @@
 # Simulation parameters
 subsection Simulation
   # Type of simulation: FSI/Fluid/Solid
-<<<<<<< HEAD
-  set Simulation type =  Fluid
-=======
   set Simulation type =  FSI
->>>>>>> DIPTestMerging
 
   # The dimension of the simulation
   set Dimension = 2
@@ -22,17 +18,10 @@ subsection Simulation
   set Global refinements = 0, 0
 
   # The end time of the simulation in second
-<<<<<<< HEAD
-  set End time = 30e1
-
-  # The time step in second
-  set Time step size = 1.67e-1
-=======
   set End time = 2e0
 
   # The time step in second
   set Time step size = 1e-2
->>>>>>> DIPTestMerging
 
   # The output interval frequency
   set Output interval = 1
@@ -43,20 +32,12 @@ subsection Simulation
   # Checkpoint save interval in second
   set Save interval = 100
 
-<<<<<<< HEAD
   # Body force which applies to both fluid and solid (acceleration) (cm s^-2) -> (m s^-2 * 100)
-=======
-  # Body force which applies to both fluid and solid (acceleration)
->>>>>>> DIPTestMerging
   set Gravity = 0.0, 0.0
 
   # Initial velocity which only applies to solid
   set Initial velocity = 0.0, 0.0
-<<<<<<< HEAD
-
-=======
   
->>>>>>> DIPTestMerging
   # Set condition for calculating indicator field (only applied to OpenIFEM-SABLE Coupling)
   # Options: CompletelyInsideSolid and PartiallyInsideSolid
   set Indicator field condition = CompletelyInsideSolid
@@ -73,33 +54,19 @@ subsection Fluid finite element system
 end
 
 subsection Fluid material properties
-<<<<<<< HEAD
-  # The dynamic viscosity (g cm^-1 s^-1)
-  set Dynamic viscosity = 0.002
-
-  # Fluid density (g/cm^3)
-=======
   # The dynamic viscosity
   set Dynamic viscosity = 0.002
 
   # Fluid density
->>>>>>> DIPTestMerging
   set Fluid density = 1
 end
 
 subsection Fluid solver control
   # The global Grad-Div stabilization, empirically should be in [0.1, 1]
-<<<<<<< HEAD
   set Grad-Div stabilization = 0.5
 
   # Maximum number of Newton iterations at a time step
   set Max Newton iterations = 16
-=======
-  set Grad-Div stabilization = 0.1
-
-  # Maximum number of Newton iterations at a time step
-  set Max Newton iterations = 8
->>>>>>> DIPTestMerging
 
   # The relative tolerance of the nonlinear system residual
   set Nonlinear system tolerance = 1e-6
@@ -116,11 +83,7 @@ subsection Fluid Dirichlet BCs
   set Number of Dirichlet BCs = 3
 
   # List all the boundaries with Dirichlet BCs
-<<<<<<< HEAD
   set Dirichlet boundary id = 10, 11, 13
-=======
-  set Dirichlet boundary id = 0, 2, 3
->>>>>>> DIPTestMerging
 
   # List the constrained components of these boundaries
   # One decimal number indicates one set of constrained components:
@@ -129,27 +92,13 @@ subsection Fluid Dirichlet BCs
   set Dirichlet boundary components = 3, 2, 3
 
   # Specify the values of the Dirichlet BCs, including both homogeneous and
-<<<<<<< HEAD
   # inhomogeneous ones. (cm s^-1)
   set Dirichlet boundary values = 10, 0, 0, 0, 0
-=======
-  # inhomogeneous ones.
-  set Dirichlet boundary values = 1, 0, 0, 0, 0
->>>>>>> DIPTestMerging
 end
 
 subsection Fluid Neumann BCs
   # Number of boundaries with Neumann BCs (specifically, pressure BC)
   # Note: do-nothing (zero pressure) boundary do not need to be explicitly specified!)
-<<<<<<< HEAD
-  set Number of Neumann BCs = 1
-
-  # List all the boundaries with Neumann BCs
-  set Neumann boundary id = 14
-
-  #Specify the values of the pressure of the Neumann BCs
-  set Neumann boundary values = 0
-=======
   set Number of Neumann BCs = 0
 
   # List all the boundaries with Neumann BCs
@@ -157,7 +106,6 @@ subsection Fluid Neumann BCs
 
   #Specify the values of the pressure of the Neumann BCs
   set Neumann boundary values = 10
->>>>>>> DIPTestMerging
 end
 
 # --------------------------------------------------------------------------------
@@ -171,38 +119,21 @@ subsection Solid material properties
   # Material type, currently LinearElastic, Kirchhoff and NeoHookean are available
   set Solid type = LinearElastic
 
-<<<<<<< HEAD
-  # Solid density, used by all solid solvers (g cm^-3) -> (10^-3 kg m^-3)
-  set Solid density = 2.7
-
-  # E and nu are only used by linearElasticMaterial (dyne cm^-2) -> (0.1Pa)
-  set Young's modulus = 1e9
-
-  set Poisson's ratio = 0.25
-
-  # A list of parameters used by hyperelasticMaterial (Shear modulus G, Bulk modulus k) (dyne cm^-2) -> (0.1Pa), (dyne cm^-2) -> (0.1Pa) 
-=======
   # Solid density, used by all solid solvers
   set Solid density = 2.7
 
   # E and nu are only used by linearElasticMaterial
-  set Young's modulus = 1e10
+  set Young's modulus = 1e5
 
   set Poisson's ratio = 0.25
 
   # A list of parameters used by hyperelasticMaterial
->>>>>>> DIPTestMerging
   set Hyperelastic parameters = 0.5, 1.67
 end
 
 subsection Solid solver control
-<<<<<<< HEAD
   # Artifitial damping. (unsure, but probably dyne cm^-1) (10^-3 N m^-1)
   set Damping = 0.0
-=======
-  # Artifitial damping.
-  set Damping = 0
->>>>>>> DIPTestMerging
 
   # Number of Newton-Raphson iterations allowed, used by hyperelastic solver only
   set Max Newton iterations = 10
@@ -217,17 +148,10 @@ end
 # Only homogeneous Dirichlet BC is supported, i.e., the prescribed value is always 0.
 subsection Solid Dirichlet BCs
   # Dirichlet BCs can be applied to multiple boundaries.
-<<<<<<< HEAD
   set Number of Dirichlet BCs = 0
 
   # List all the constrained boundaries here
   set Dirichlet boundary id = 21
-=======
-  set Number of Dirichlet BCs = 1
-
-  # List all the constrained boundaries here
-  set Dirichlet boundary id = 5
->>>>>>> DIPTestMerging
 
   # List the constrained components of these boundaries
   # One decimal number indicates one set of constrained components:
@@ -239,31 +163,18 @@ end
 # Two types of Neumann BCs are supported: traction and pressure.
 # Pressure is defined w.r.t. the reference configuration.
 # (Original normal vectors are used to compute the traction.)
-<<<<<<< HEAD
-# Applies an external force on the mesh on the specified boundary
-=======
->>>>>>> DIPTestMerging
 subsection Solid Neumann BCs
   # Indicates how many sets of Neumann boundary conditions to expect.
   set Number of Neumann BCs = 0
 
   # The id, type, and values must appear n_neumann_bcs times.
-<<<<<<< HEAD
-  set Neumann boundary id = 24
-=======
   set Neumann boundary id = 8
->>>>>>> DIPTestMerging
 
   # Traction/Pressure, currently they cannot coexist.
   set Neumann boundary type = Traction
 
   # If traction, dim*n_solid_neumann_bcs components are expected;
-<<<<<<< HEAD
   # if pressure, n_solid_neumann_bcs components are expected. (dyne cm^-2) -> (0.1Pa)
   # traction sets values in x, y, z directions, pressure sets normal to original face direction
   set Neumann boundary values = 0, 0
-=======
-  # if pressure, n_solid_neumann_bcs components are expected.
-  set Neumann boundary values = 0, -0.01e5
->>>>>>> DIPTestMerging
 end
