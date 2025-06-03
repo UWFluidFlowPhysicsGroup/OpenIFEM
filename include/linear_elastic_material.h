@@ -2,6 +2,9 @@
 #define LINEAR_ELASTIC_MATERIAL
 
 #include <deal.II/base/symmetric_tensor.h>
+//needed for vector relations for anisotropy
+#include <deal.II/physics/vector_relations.h>
+#include <deal.II/base/tensor.h>
 
 #include "material.h"
 
@@ -23,6 +26,7 @@ namespace Solid
     LinearElasticMaterial(double, double, double, double);
     dealii::SymmetricTensor<4, dim> get_elasticity() const;
     dealii::SymmetricTensor<4, dim> get_viscosity() const;
+    dealii::SymmetricTensor<4, dim> rotate_tensor(dealii::Tensor<2, dim> grad_u, dealii::Tensor<4, dim> elasticity) const;
 
   protected:
     double E;      //!< Young's modulus

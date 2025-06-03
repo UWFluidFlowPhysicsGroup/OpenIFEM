@@ -382,9 +382,31 @@ namespace Solid
         if (parameters.n_solid_parts == 1)
           mat_id = 1;
         elasticity = material[mat_id - 1].get_elasticity();
-
+        
         for (unsigned int q = 0; q < volume_quad_formula.size(); ++q)
           {
+            //TODO: Code for anisotropy, commented out code that should work for parameters file integration
+            //if (parameters.solid_type != "isotropic"){
+            if (true){
+              //Create tensor for elasticity tensor in principal coordinates
+              dealii::SymmetricTensor<4, dim> elasticity_principal = material[mat_id - 1].get_elasticity();
+              //TODO find how to convert from std::Tensor to dealii::Tensor inline
+              dealii::Tensor<2, dim> tmp_current_displacement_gradients;
+              for (unsigned int i=0; i < dim; ++i){
+                for (unsigned int j=0; j < dim; ++j){
+                  tmp_current_displacement_gradients[i][j] = current_displacement_gradients[q][i][j];
+                }  
+              }
+
+              //std::cout << tmp_current_displacement_gradients[0][0] << "    " << tmp_current_displacement_gradients[0][1] << "\n"
+              //<< tmp_current_displacement_gradients[1][0] << "    " << tmp_current_displacement_gradients[1][1] << "\n\n"; 
+
+
+              //Create rotated elasticity code using elasticity_principal as reference
+              //TODO modify rotate_tensor code to obtain elasticity tensor from there, only input is the displacement gradient?
+              elasticity = material[mat_id - 1].rotate_tensor(tmp_current_displacement_gradients, elasticity_principal);
+            }
+            
             SymmetricTensor<2, dim> tmp_strain, tmp_stress;
             for (unsigned int i = 0; i < dim; ++i)
               {
