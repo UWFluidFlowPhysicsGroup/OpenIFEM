@@ -17,7 +17,7 @@ namespace Solid
   {
   public:
     LinearElasticMaterial()
-      : Material<dim>(), E(0.0), nu(0.0), lambda(0.0), mu(0.0), eta(0.0), material_type("Isotropic"), fiber({1,1})
+      : Material<dim>(), E(0.0), nu(0.0), lambda(0.0), mu(0.0), eta(0.0), material_type("Isotropic"), fiber()
     {
     }
     /**
