@@ -119,6 +119,11 @@ namespace Parameters
     std::vector<double> E;   //!< Young's modulus, linear elastic material only.
     std::vector<double> nu;  //!< Poisson's ratio, linear elastic material only.
     std::vector<double> eta; //!< Viscosity, linear elastic material only.
+    
+    std::vector<std::string> material_type; //!< Material type (isotropic, planar isotropic), linear elastic material only.
+    //TODO change from single vector to a vector of vectors, right now fiber direction is same for all materials
+    std::vector<double> fiber; //!< Initial fiber direction for anisotropic linear elastic materials.
+
     std::vector<std::vector<double>> C; //!< Hyperelastic material constants.
     static void declareParameters(ParameterHandler &);
     void parseParameters(ParameterHandler &);

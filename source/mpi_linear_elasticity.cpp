@@ -18,7 +18,9 @@ namespace Solid
           LinearElasticMaterial<dim> tmp(parameters.E[i],
                                          parameters.nu[i],
                                          parameters.solid_rho,
-                                         parameters.eta[i]);
+                                         parameters.eta[i],
+                                         parameters.material_type[i],
+                                         parameters.fiber);
           material[i] = tmp;
         }
     }

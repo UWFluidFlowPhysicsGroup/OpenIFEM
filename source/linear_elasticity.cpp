@@ -12,10 +12,15 @@ namespace Solid
     material.resize(parameters.n_solid_parts, LinearElasticMaterial<dim>());
     for (unsigned int i = 0; i < parameters.n_solid_parts; ++i)
       {
+        //TODO fix issue with calling fiber as vector in parameters, currently is 'const double'
         LinearElasticMaterial<dim> tmp(parameters.E[i],
                                        parameters.nu[i],
                                        parameters.solid_rho,
-                                       parameters.eta[i]);
+                                       parameters.eta[i],
+                                       parameters.material_type[i],
+                                       parameters.fiber);
+        
+        
         material[i] = tmp;
       }
   }
@@ -397,7 +402,6 @@ namespace Solid
                   tmp_current_displacement_gradients[i][j] = current_displacement_gradients[q][i][j];
                 }  
               }
-
               //std::cout << tmp_current_displacement_gradients[0][0] << "    " << tmp_current_displacement_gradients[0][1] << "\n"
               //<< tmp_current_displacement_gradients[1][0] << "    " << tmp_current_displacement_gradients[1][1] << "\n\n"; 
 

@@ -406,6 +406,19 @@ namespace Parameters
                         "0.0",
                         Patterns::List(dealii::Patterns::Double(0, 0.5)),
                         "Poisson's ratio, only used by linear elastic solver");
+      
+      //TODO add isotropic/anisotropic material type and input for fiber direction
+      //Use solid dirichelt BCs as template for fiber direction
+      prm.declare_entry("Material type",
+                        "Isotropic",
+                        Patterns::List(dealii::Patterns::Selection("Isotropic|PlanarIsotropic")),
+                        "Material Isotropy");
+      prm.declare_entry("Initial fiber direction",
+                        "",
+                        Patterns::List(dealii::Patterns::Double()),
+                        "Initial fiber direction, for non isotropic materials only");
+
+
       prm.declare_entry("Viscosity",
                         "0.0",
                         Patterns::List(dealii::Patterns::Double(0)),
@@ -429,11 +442,20 @@ namespace Parameters
       n_solid_parts = prm.get_integer("Number of solid parts");
       AssertThrow(n_solid_parts > 0,
                   ExcMessage("Number of solid part less than 1!"));
+      //TODO add isotropic/anisotropic material type and input for fiber direction
+      //TODO make so isotropic materials dont need any fiber direction values
+      
+      std::string raw_input = prm.get("Material type");
+      material_type = Utilities::split_string_list(raw_input);
+      AssertThrow(material_type.size() == n_solid_parts,
+                ExcMessage("Inconsistent material types!"));
+
+      
       E.resize(n_solid_parts, 0);
       nu.resize(n_solid_parts, 0);
       C.resize(n_solid_parts);
       solid_rho = prm.get_double("Solid density");
-      std::string raw_input = prm.get("Young's modulus");
+      raw_input = prm.get("Young's modulus");
       std::vector<std::string> parsed_input =
         Utilities::split_string_list(raw_input);
       E = Utilities::string_to_double(parsed_input);
@@ -449,6 +471,49 @@ namespace Parameters
       eta = Utilities::string_to_double(parsed_input);
       AssertThrow(eta.size() == n_solid_parts,
                   ExcMessage("Inconsistent viscosity!"));
+
+      
+      
+      //fiber direction only considered for not isotropic materials
+      //need to fix this if statement, need to go through list of material types
+      //not sure if properly assigns fiber directions
+      raw_input = prm.get("Initial fiber direction");
+      parsed_input = Utilities::split_string_list(raw_input);
+      fiber = Utilities::string_to_double(parsed_input);
+      
+      //need to get dimension from Simulation section, and number of non-isotropic parts that need fiber direction
+      // int dimension = 2;
+      // AssertThrow(parsed_input.size() == n_solid_parts*dimension,
+      //           ExcMessage("Inconsistent fiber directions!"));
+      // for (unsigned int i = 0; i < n_solid_parts; i++)
+      // {
+      //   //TODO find how to set the ith vector as the next 2 or 3 inputs
+      //   fiber[i]
+      // }
+      
+
+      //copied from solid_neumann_type
+      // solid_neumann_bc_type = prm.get("Neumann boundary type");
+      // unsigned int tmp =
+      //   (solid_neumann_bc_type == "Traction" ? solid_neumann_bc_dim : 1);
+      // raw_input = prm.get("Neumann boundary values");
+      // parsed_input = Utilities::split_string_list(raw_input);
+      // std::vector<double> values = Utilities::string_to_double(parsed_input);
+      // AssertThrow(!n_solid_neumann_bcs ||
+      //               values.size() == tmp * n_solid_neumann_bcs,
+      //             ExcMessage("Inconsistent boundary values!"));
+      // for (unsigned int i = 0; i < n_solid_neumann_bcs; ++i)
+      //   {
+      //     std::vector<double> value;
+      //     for (unsigned int j = 0; j < tmp; ++j)
+      //       {
+      //         value.push_back(values[i * tmp + j]);
+      //       }
+      //     solid_neumann_bcs[ids[i]] = value;
+      //   }
+
+
+
       raw_input = prm.get("Hyperelastic parameters");
       parsed_input = Utilities::split_string_list(raw_input);
       // declare the size for each vector defining one hyperelastic material
