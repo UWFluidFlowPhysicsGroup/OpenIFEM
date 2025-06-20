@@ -8,9 +8,9 @@ namespace Solid
                                                     double rho,
                                                     double eta,
                                                     std::string material_type,
-                                                    std::vector<double> fiber
+                                                    std::vector<double> initial_fiber
                                                     )
-    : Material<dim>(rho), E(young), nu(poisson), eta(eta), material_type(material_type), fiber(fiber)
+    : Material<dim>(rho), E(young), nu(poisson), eta(eta), material_type(material_type), initial_fiber(initial_fiber)
   {
     this->lambda = E * nu / ((1 + nu) * (1 - 2 * nu));
     this->mu = E / (2 * (1 + nu));
@@ -190,38 +190,41 @@ namespace Solid
     return viscosity;
   }
 
+  //Can also be used to rotate viscosity if anisotropic viscosity is required
   template <int dim>
   dealii::SymmetricTensor<4, dim>
-  LinearElasticMaterial<dim>::rotate_tensor(dealii::Tensor<2, dim> grad_u, dealii::SymmetricTensor<4, dim> elasticity) const
+  LinearElasticMaterial<dim>::rotate_tensor(dealii::Tensor<1, dim> current_fiber, dealii::SymmetricTensor<4, dim> elasticity) const
   {
-    //TODO replace this with getting initial fiber coordinates from parameters/material file
-    //creating array to get fiber coordinates before creating tensor
-    dealii::Tensor<1, dim> fiber;
-    fiber[0] = this->fiber[0];
-    fiber[1] = this->fiber[1];
-    //define z axis only for 3D case (otherwise out of bounds)
-    if (dim == 3){
-      fiber[2] = this->fiber[2];
-    }
-    
-    //std::cout << fiber[0] << " , " << fiber[1] << "\n";
-
-    //Define deformation gradient F
-    dealii::Tensor<2, dim> F = grad_u +  dealii::unit_symmetric_tensor<dim>();
-    // for (int i = 0; i < dim; i++){
-    //   F[i][i]++;
+    // //TODO replace this with getting initial fiber coordinates from parameters/material file
+    // //creating array to get fiber coordinates before creating tensor
+    // dealii::Tensor<1, dim> fiber;
+    // fiber[0] = this->fiber[0];
+    // fiber[1] = this->fiber[1];
+    // //define z axis only for 3D case (otherwise out of bounds)
+    // if (dim == 3){
+    //   fiber[2] = this->fiber[2];
     // }
-    //dealii::Tensor<2, dim> F = grad_u + dealii::SymmetricTensor<2, dim>::unit_symmetric_tensor();
+    
+    // //std::cout << fiber[0] << " , " << fiber[1] << "\n";
 
-    //rotate fiber direction from initial to current fiber direction
-    fiber = F*fiber;
+    // //Define deformation gradient F
+    // dealii::Tensor<2, dim> F = grad_u + dealii::unit_symmetric_tensor<dim>();
+    // // for (int i = 0; i < dim; i++){
+    // //   F[i][i]++;
+    // // }
+    // //dealii::Tensor<2, dim> F = grad_u + dealii::SymmetricTensor<2, dim>::unit_symmetric_tensor();
 
-    dealii::Tensor<1, dim> fiberxy, xaxis;
-    fiberxy[0] = fiber[0];
-    fiberxy[1] = fiber[1];
+    // //rotate fiber direction from initial to current fiber direction
+    // fiber = F*fiber;
+
+    dealii::Tensor<1, dim> current_fiberxy, xaxis;
+    current_fiberxy[0] = current_fiber[0];
+    current_fiberxy[1] = current_fiber[1];
     xaxis[0] = 1;
 
-    double theta = fiberxy.norm() == 0 ? 0 : dealii::Physics::VectorRelations::angle(fiberxy, xaxis);
+    double theta = current_fiberxy.norm() == 0 ? 0 : dealii::Physics::VectorRelations::angle(current_fiberxy, xaxis);
+    //double theta = fiberxy.norm() == 0 ? 0 : (fiber[1] > 0 ? dealii::Physics::VectorRelations::angle(fiberxy, xaxis) : -dealii::Physics::VectorRelations::angle(fiberxy, xaxis));
+    theta = fiber[1] > 0 ? theta : -theta;
   
     dealii::Tensor<2, dim> R = dealii::unit_symmetric_tensor<dim>(), Rz = dealii::unit_symmetric_tensor<dim>();
   
@@ -241,7 +244,8 @@ namespace Solid
     {
       //3d case needs phi to account for components in the z direction, which is found using xy projection and full fiber direction
       const double pi = 3.14159265358979323846;
-      double phi = fiberxy.norm() == 0 ? pi/2 : dealii::Physics::VectorRelations::angle(fiber, fiberxy);
+      double phi = current_fiberxy.norm() == 0 ? pi/2 : dealii::Physics::VectorRelations::angle(current_fiber, current_fiberxy);
+      phi = current_fiber[2] > 0 ? phi : -phi;
 
       dealii::Tensor<2, dim> Ry = dealii::unit_symmetric_tensor<dim>();
 
@@ -291,6 +295,16 @@ namespace Solid
 
     return elasticity;
   }
+  
+  //Might move to solid_solver or utilities 
+  template <int dim>
+  dealii::SymmetricTensor<1, dim>
+  LinearElasticMaterial<dim>::get_current_fiber_direction(dealii::Tensor<2, dim> deformation_gradient) const
+  {
+    dealii::Tensor<1, dim> current_fiber = (deformation_gradient + dealii::unit_symmetric_tensor<dim>())*this->initial_fiber;
+    return current_fiber;
+  }
+
 
   // explicit instantiation
   template class LinearElasticMaterial<2>;

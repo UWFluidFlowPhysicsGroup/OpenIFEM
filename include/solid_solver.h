@@ -154,7 +154,11 @@ namespace Solid
     Vector<double> previous_acceleration;
     Vector<double> previous_velocity;
     Vector<double> previous_displacement;
-
+    
+    /**
+     * Current fiber direction, used for anisotropic materials
+     */
+    Vector<double> current_fiber;
     /**
      * Nodal strain and stress obtained by taking the average of surrounding
      * cell-averaged strains and stresses. Their sizes are

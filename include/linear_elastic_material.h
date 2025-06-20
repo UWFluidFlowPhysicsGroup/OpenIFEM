@@ -17,7 +17,7 @@ namespace Solid
   {
   public:
     LinearElasticMaterial()
-      : Material<dim>(), E(0.0), nu(0.0), lambda(0.0), mu(0.0), eta(0.0), material_type("Isotropic"), fiber()
+      : Material<dim>(), E(0.0), nu(0.0), lambda(0.0), mu(0.0), eta(0.0), material_type("Isotropic"), initial_fiber()
     {
     }
     /**
@@ -26,7 +26,8 @@ namespace Solid
     LinearElasticMaterial(double, double, double, double, std::string, std::vector<double>);
     dealii::SymmetricTensor<4, dim> get_elasticity() const;
     dealii::SymmetricTensor<4, dim> get_viscosity() const;
-    dealii::SymmetricTensor<4, dim> rotate_tensor(dealii::Tensor<2, dim> grad_u, dealii::SymmetricTensor<4, dim> elasticity) const;
+    dealii::SymmetricTensor<4, dim> rotate_tensor(dealii::Tensor<1, dim> current_fiber, dealii::SymmetricTensor<4, dim> elasticity) const;
+    dealii::Tensor<1, dim> get_current_fiber(dealii::Tensor<2, dim> deformation_gradient) const;
 
   protected:
     double E;      //!< Young's modulus
@@ -35,7 +36,7 @@ namespace Solid
     double mu;     //!< Second lame parameter
     double eta;    //!< Viscosity
     std::string material_type;
-    std::vector<double> fiber;
+    std::vector<double> initial_fiber;
   };
 } // namespace Solid
 

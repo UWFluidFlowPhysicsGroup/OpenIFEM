@@ -356,6 +356,13 @@ namespace Solid
       dim,
       std::vector<Vector<double>>(dim,
                                   Vector<double>(volume_quad_formula.size())));
+    //fiber direction values
+    std::vector<Vector<double>> cell_fiber(
+      std::vector<Vector<double>>(dim,
+                                  Vector<double>(scalar_fe.dofs_per_cell)));
+    std::vector<Vector<double>> quad_fiber(
+      std::vector<Vector<double>>(dim,
+                                  Vector<double>(volume_quad_formula.size())));
 
     // Displacement gradients at quadrature points.
     std::vector<Tensor<2, dim>> current_displacement_gradients(
@@ -390,10 +397,12 @@ namespace Solid
         
         for (unsigned int q = 0; q < volume_quad_formula.size(); ++q)
           {
-            //TODO: Code for anisotropy, commented out code that should work for parameters file integration
+            //TODO: Code for anisotropy, commented out code that should work for parameters file integration, should move to its own function to rotate vector direction
             //if (parameters.solid_type != "isotropic"){
-            if (true){
+            if (material[mat_id - 1].material_type != "Isotropic")
+            {
               //Create tensor for elasticity tensor in principal coordinates
+              //need to get elasticity again for each quadrature point
               dealii::SymmetricTensor<4, dim> elasticity_principal = material[mat_id - 1].get_elasticity();
               //TODO find how to convert from std::Tensor to dealii::Tensor inline
               dealii::Tensor<2, dim> tmp_current_displacement_gradients;
@@ -402,13 +411,16 @@ namespace Solid
                   tmp_current_displacement_gradients[i][j] = current_displacement_gradients[q][i][j];
                 }  
               }
-              //std::cout << tmp_current_displacement_gradients[0][0] << "    " << tmp_current_displacement_gradients[0][1] << "\n"
-              //<< tmp_current_displacement_gradients[1][0] << "    " << tmp_current_displacement_gradients[1][1] << "\n\n"; 
 
+              tmp_fiber = get_current_fiber_direction(tmp_current_displacement_gradients);
+              for (unsigned int i=0; i < dim; ++i)
+              {
+                quad_fiber[q][i] = tmp_fiber[i];  
+              }
 
               //Create rotated elasticity code using elasticity_principal as reference
               //TODO modify rotate_tensor code to obtain elasticity tensor from there, only input is the displacement gradient?
-              elasticity = material[mat_id - 1].rotate_tensor(tmp_current_displacement_gradients, elasticity_principal);
+              elasticity = material[mat_id - 1].rotate_tensor(tmp_fiber, elasticity_principal);
             }
             
             SymmetricTensor<2, dim> tmp_strain, tmp_stress;
@@ -439,10 +451,15 @@ namespace Solid
               {
                 qpt_to_dof.vmult(cell_strain[i][j], quad_strain[i][j]);
                 qpt_to_dof.vmult(cell_stress[i][j], quad_stress[i][j]);
+                //TODO add if statement to only do fiber direction if not isotropic?
+                if (material[mat_id - 1].material_type != "Isotropic")
+                qpt_to_dof.vmult(cell_fiber[i][j], quad_fiber[i][j]);
                 for (unsigned int k = 0; k < scalar_fe.dofs_per_cell; ++k)
                   {
                     strain[i][j][dof_indices[k]] += cell_strain[i][j][k];
                     stress[i][j][dof_indices[k]] += cell_stress[i][j][k];
+                    if (material[mat_id - 1].material_type != "Isotropic")
+                    fiber[i][j][dof_indices[k]] += cell_fiber[i][j][k];
                     if (i == 0 && j == 0)
                       surrounding_cells[dof_indices[k]]++;
                   }
@@ -458,6 +475,9 @@ namespace Solid
               {
                 strain[i][j][k] /= surrounding_cells[k];
                 stress[i][j][k] /= surrounding_cells[k];
+                
+                if (material[mat_id - 1].material_type != "Isotropic")
+                fiber[i][j][k] /= surrounding_cells[k];
               }
           }
       }

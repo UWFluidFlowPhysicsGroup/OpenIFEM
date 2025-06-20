@@ -190,6 +190,19 @@ namespace Solid
         data_out.add_data_vector(scalar_dof_handler, stress[2][2], "Szz");
       }
 
+
+    // fiber direction (anisotropic only)
+    //TODO fix how to obtain material type
+    if (material_type != "Isotropic")
+    {
+      solution_names = std::vector<std::string>(spacedim, "fiber direction");
+      data_out.add_data_vector(dof_handler,
+                             current_fiber,
+                             solution_names,
+                             data_component_interpretation);
+    }
+
+
     data_out.build_patches();
 
     std::string basename = "solid";
