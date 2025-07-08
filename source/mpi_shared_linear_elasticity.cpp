@@ -14,14 +14,28 @@ namespace Solid
       material.resize(parameters.n_solid_parts, LinearElasticMaterial<dim>());
       for (unsigned int i = 0; i < parameters.n_solid_parts; ++i)
         {
-          LinearElasticMaterial<dim> tmp(parameters.E[i],
-                                         parameters.nu[i],
-                                         parameters.solid_rho,
-                                         parameters.eta[i],
-                                         parameters.material_type[i],
-                                         parameters.fiber);
-          material[i] = tmp;
+        //TODO fix issue with calling fiber as vector in parameters, might have issue only calling the first dimension of the fiber "tensor"
+        //TODO create temp variable for fiber direction, dealii::Tensor object
+        dealii::Tensor<1,dim> tmp_fiber;
+        if (parameters.material_type[i] != "Isotropic"){
+          for (unsigned int j = 0; j < dim; j++){
+            tmp_fiber[j] = parameters.fiber[i][j];
+          }
         }
+
+        LinearElasticMaterial<dim> tmp(parameters.E[i],
+                                       parameters.nu[i],
+                                       parameters.solid_rho,
+                                       parameters.eta[i],
+                                       parameters.material_type[i],
+                                       tmp_fiber,
+                                       parameters.E1[i],
+                                       parameters.E2[i],
+                                       parameters.nu12[i],
+                                       parameters.nu23[i],
+                                       parameters.G12[i]);
+        material[i] = tmp;
+      }
     }
 
     template <int dim>

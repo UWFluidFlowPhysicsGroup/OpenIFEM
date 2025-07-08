@@ -158,7 +158,9 @@ namespace Solid
     /**
      * Current fiber direction, used for anisotropic materials
      */
-    Vector<double> current_fiber;
+    //mutable std::vector<Vector<double>> fiber;
+    Vector<double> fiber;
+     
     /**
      * Nodal strain and stress obtained by taking the average of surrounding
      * cell-averaged strains and stresses. Their sizes are

@@ -122,7 +122,14 @@ namespace Parameters
     
     std::vector<std::string> material_type; //!< Material type (isotropic, planar isotropic), linear elastic material only.
     //TODO change from single vector to a vector of vectors, right now fiber direction is same for all materials
-    std::vector<double> fiber; //!< Initial fiber direction for anisotropic linear elastic materials.
+    unsigned int solid_material_dim; //!< Used to parse fiber vectors
+    std::vector<std::vector<double>> fiber; //!< Initial fiber direction for anisotropic linear elastic materials.
+    //Creating new variables for parameters in each direction to avoid issues with indices when assigning isotropic and anisotropic materials 
+    std::vector<double> E1;          //!< Young's modulus in fiber direction for planar isotropic materials
+    std::vector<double> E2;          //!< Young's modulus in isotropic plane for planar isotropic materials
+    std::vector<double> nu12;        //!< Poisson ratio in fiber direction for planar isotropic materials
+    std::vector<double> nu23;        //!< Poisson ratio in isotropic plane for planar isotropic materials
+    std::vector<double> G12;         //!< Shear modulus in fiber direction for planar isotropic materials
 
     std::vector<std::vector<double>> C; //!< Hyperelastic material constants.
     static void declareParameters(ParameterHandler &);

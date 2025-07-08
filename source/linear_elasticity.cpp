@@ -12,15 +12,25 @@ namespace Solid
     material.resize(parameters.n_solid_parts, LinearElasticMaterial<dim>());
     for (unsigned int i = 0; i < parameters.n_solid_parts; ++i)
       {
-        //TODO fix issue with calling fiber as vector in parameters, currently is 'const double'
+        //TODO fix issue with calling fiber as vector in parameters, might have issue only calling the first dimension of the fiber "tensor"
+        //TODO create temp variable for fiber direction, dealii::Tensor object
+        dealii::Tensor<1,dim> tmp_fiber;
+        if (parameters.material_type[i] != "Isotropic"){
+          for (unsigned int j = 0; j < dim; j++){
+            tmp_fiber[j] = parameters.fiber[i][j];
+          }
+        }
         LinearElasticMaterial<dim> tmp(parameters.E[i],
                                        parameters.nu[i],
                                        parameters.solid_rho,
                                        parameters.eta[i],
                                        parameters.material_type[i],
-                                       parameters.fiber);
-        
-        
+                                       tmp_fiber,
+                                       parameters.E1[i],
+                                       parameters.E2[i],
+                                       parameters.nu12[i],
+                                       parameters.nu23[i],
+                                       parameters.G12[i]);
         material[i] = tmp;
       }
   }
@@ -403,23 +413,23 @@ namespace Solid
             {
               //Create tensor for elasticity tensor in principal coordinates
               //need to get elasticity again for each quadrature point
+              //dont need, can just use regular elasticity above
               dealii::SymmetricTensor<4, dim> elasticity_principal = material[mat_id - 1].get_elasticity();
-              //TODO find how to convert from std::Tensor to dealii::Tensor inline
+             
               dealii::Tensor<2, dim> tmp_current_displacement_gradients;
+              
               for (unsigned int i=0; i < dim; ++i){
                 for (unsigned int j=0; j < dim; ++j){
                   tmp_current_displacement_gradients[i][j] = current_displacement_gradients[q][i][j];
-                }  
-              }
+                }
 
-              tmp_fiber = get_current_fiber_direction(tmp_current_displacement_gradients);
+              }
+              dealii::Tensor<1,dim> tmp_fiber = material[mat_id - 1].get_current_fiber_direction(tmp_current_displacement_gradients);
               for (unsigned int i=0; i < dim; ++i)
               {
-                quad_fiber[q][i] = tmp_fiber[i];  
+                quad_fiber[i][q] = tmp_fiber[i];        
               }
 
-              //Create rotated elasticity code using elasticity_principal as reference
-              //TODO modify rotate_tensor code to obtain elasticity tensor from there, only input is the displacement gradient?
               elasticity = material[mat_id - 1].rotate_tensor(tmp_fiber, elasticity_principal);
             }
             
@@ -444,22 +454,28 @@ namespace Solid
                   }
               }
           }
-
         for (unsigned int i = 0; i < dim; ++i)
           {
             for (unsigned int j = 0; j < dim; ++j)
               {
                 qpt_to_dof.vmult(cell_strain[i][j], quad_strain[i][j]);
                 qpt_to_dof.vmult(cell_stress[i][j], quad_stress[i][j]);
-                //TODO add if statement to only do fiber direction if not isotropic?
-                if (material[mat_id - 1].material_type != "Isotropic")
-                qpt_to_dof.vmult(cell_fiber[i][j], quad_fiber[i][j]);
+                
+                if (material[mat_id - 1].material_type != "Isotropic" && j == 0)
+                qpt_to_dof.vmult(cell_fiber[i], quad_fiber[i]);
                 for (unsigned int k = 0; k < scalar_fe.dofs_per_cell; ++k)
                   {
                     strain[i][j][dof_indices[k]] += cell_strain[i][j][k];
                     stress[i][j][dof_indices[k]] += cell_stress[i][j][k];
-                    if (material[mat_id - 1].material_type != "Isotropic")
-                    fiber[i][j][dof_indices[k]] += cell_fiber[i][j][k];
+                    // checking for j=0 to avoid repeated addition as j = 0 -> dim
+                    if (material[mat_id - 1].material_type != "Isotropic" && j == 0){
+                      // this is VERY slow, need to fix
+                      // fiber[i][dof_indices[k]] += cell_fiber[i][k];
+                      fiber[dim*dof_indices[k]] += cell_fiber[0][k];
+                      fiber[dim*dof_indices[k] + 1] += cell_fiber[1][k];
+                      if (dim == 3)
+                        fiber[dim*dof_indices[k] + 2] += cell_fiber[2][k];
+                    }
                     if (i == 0 && j == 0)
                       surrounding_cells[dof_indices[k]]++;
                   }
@@ -475,9 +491,15 @@ namespace Solid
               {
                 strain[i][j][k] /= surrounding_cells[k];
                 stress[i][j][k] /= surrounding_cells[k];
-                
-                if (material[mat_id - 1].material_type != "Isotropic")
-                fiber[i][j][k] /= surrounding_cells[k];
+                //if (material[mat_id - 1].material_type != "Isotropic")
+                //{
+                fiber[dim*k] /= surrounding_cells[k];
+                fiber[dim*k + 1] /= surrounding_cells[k];
+                if (dim == 3)
+                  fiber[dim*k + 2] /= surrounding_cells[k];
+                  //if (material[mat_id - 1].material_type != "Isotropic")
+                  //fiber[i][j][k] /= surrounding_cells[k];
+                //}
               }
           }
       }

@@ -110,6 +110,10 @@ namespace Solid
       spacedim,
       std::vector<Vector<double>>(spacedim,
                                   Vector<double>(scalar_dof_handler.n_dofs())));
+      
+    // fiber = std::vector<Vector<double>>(
+    //   spacedim, Vector<double>(scalar_dof_handler.n_dofs()));
+    fiber.reinit(dof_handler.n_dofs());
 
     // Set up cell property, which contains the FSI traction required in FSI
     // simulation
@@ -191,16 +195,17 @@ namespace Solid
       }
 
 
-    // fiber direction (anisotropic only)
-    //TODO fix how to obtain material type
-    if (material_type != "Isotropic")
-    {
-      solution_names = std::vector<std::string>(spacedim, "fiber direction");
-      data_out.add_data_vector(dof_handler,
-                             current_fiber,
-                             solution_names,
-                             data_component_interpretation);
-    }
+    // //fiber direction (anisotropic only)
+    // if statement is required to only export fiber data only when anisotropic materials are present
+    // otherwise breaks all the previous test cases
+    // if (material_type != "Isotropic")
+    // {
+      // solution_names = std::vector<std::string>(spacedim, "fiber direction");
+      // data_out.add_data_vector(dof_handler,
+      //                        fiber,
+      //                        solution_names,
+      //                        data_component_interpretation);
+    // }
 
 
     data_out.build_patches();

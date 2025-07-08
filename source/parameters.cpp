@@ -415,9 +415,28 @@ namespace Parameters
                         "Material Isotropy");
       prm.declare_entry("Initial fiber direction",
                         "",
-                        Patterns::List(dealii::Patterns::Double()),
+                        Patterns::List(Patterns::List(dealii::Patterns::Double(0))),
                         "Initial fiber direction, for non isotropic materials only");
-
+      prm.declare_entry("Young's modulus 1",
+                        "0.0",
+                        Patterns::List(dealii::Patterns::Double(0)),
+                        "Young's modulus in fiber direction, only used for transverse isotropic materials");
+      prm.declare_entry("Young's modulus 2",
+                        "0.0",
+                        Patterns::List(dealii::Patterns::Double(0)),
+                        "Young's modulus pependicular to fiber direction, only used for transverse isotropic materials");
+      prm.declare_entry("Poisson's ratio 12",
+                        "0.0",
+                        Patterns::List(dealii::Patterns::Double(0)),
+                        "Poisson's ratio involving fiber direction, only used for transverse isotropic materials");
+      prm.declare_entry("Poisson's ratio 23",
+                        "0.0",
+                        Patterns::List(dealii::Patterns::Double(0)),
+                        "Poisson's ratio in plane of isotropy, only used for transverse isotropic materials");
+      prm.declare_entry("Shear modulus",
+                        "0.0",
+                        Patterns::List(dealii::Patterns::Double(0)),
+                        "Shear modulus involving fiber direction, only used for transverse isotropic materials");
 
       prm.declare_entry("Viscosity",
                         "0.0",
@@ -441,79 +460,85 @@ namespace Parameters
       solid_type = prm.get("Solid type");
       n_solid_parts = prm.get_integer("Number of solid parts");
       AssertThrow(n_solid_parts > 0,
-                  ExcMessage("Number of solid part less than 1!"));
-      //TODO add isotropic/anisotropic material type and input for fiber direction
-      //TODO make so isotropic materials dont need any fiber direction values
-      
+                  ExcMessage("Number of solid part less than 1!"));     
       std::string raw_input = prm.get("Material type");
       material_type = Utilities::split_string_list(raw_input);
       AssertThrow(material_type.size() == n_solid_parts,
                 ExcMessage("Inconsistent material types!"));
 
       
+      //resizing isotropic and anisotropic tensor properties to all be same length and default to 0 when not used, helps with indexing when creating materials
       E.resize(n_solid_parts, 0);
       nu.resize(n_solid_parts, 0);
+      //Anisotropic properties
+      fiber.resize(n_solid_parts);
+      E1.resize(n_solid_parts, 0);
+      E2.resize(n_solid_parts, 0);
+      nu12.resize(n_solid_parts, 0);
+      nu23.resize(n_solid_parts, 0);
+      G12.resize(n_solid_parts,0);
+      
       C.resize(n_solid_parts);
-      solid_rho = prm.get_double("Solid density");
-      raw_input = prm.get("Young's modulus");
-      std::vector<std::string> parsed_input =
-        Utilities::split_string_list(raw_input);
-      E = Utilities::string_to_double(parsed_input);
-      AssertThrow(E.size() == n_solid_parts,
-                  ExcMessage("Inconsistent Youngs' moduli!"));
-      raw_input = prm.get("Poisson's ratio");
-      parsed_input = Utilities::split_string_list(raw_input);
-      nu = Utilities::string_to_double(parsed_input);
-      AssertThrow(nu.size() == n_solid_parts,
-                  ExcMessage("Inconsistent Poisson's ratios!"));
+      solid_rho = prm.get_double("Solid density"); 
+      //TODO change to loop through each material in the list
+      std::vector<std::string> parsed_input;
+      if (material_type[0] == "Isotropic")
+      {
+        raw_input = prm.get("Young's modulus");
+        parsed_input = Utilities::split_string_list(raw_input);
+        E = Utilities::string_to_double(parsed_input);
+        AssertThrow(E.size() == n_solid_parts,
+                    ExcMessage("Inconsistent Youngs' moduli!"));
+        raw_input = prm.get("Poisson's ratio");
+        parsed_input = Utilities::split_string_list(raw_input);
+        nu = Utilities::string_to_double(parsed_input);
+        AssertThrow(nu.size() == n_solid_parts,
+                    ExcMessage("Inconsistent Poisson's ratios!"));
+      }
+      else if (material_type[0] == "PlanarIsotropic")
+      {
+        //TODO make fiber direction work for array of arrays, n_solid_parts by dim
+        //fiber direction only considered for not isotropic materials
+        //need to fix this if statement, need to go through list of material types
+        //not sure if properly assigns fiber directions
+        raw_input = prm.get("Initial fiber direction");
+        parsed_input = Utilities::split_string_list(raw_input);
+        for (unsigned int i = 0; i < n_solid_parts; i++)
+        {
+          fiber[i].resize(solid_material_dim, 0);
+          //std::vector<double> tmp_fiber(solid_material_dim);
+          fiber[i][0] = Utilities::string_to_double(parsed_input[i*solid_material_dim]);
+          fiber[i][1] = Utilities::string_to_double(parsed_input[i*solid_material_dim + 1]);
+          if (solid_material_dim == 3)
+          {
+            fiber[i][2] = Utilities::string_to_double(parsed_input[i*solid_material_dim + 2]);
+          }
+          
+        }
+        //fiber = Utilities::string_to_double(parsed_input);
+
+        raw_input = prm.get("Young's modulus 1");
+        parsed_input = Utilities::split_string_list(raw_input);
+        E1 = Utilities::string_to_double(parsed_input);
+        raw_input = prm.get("Young's modulus 2");
+        parsed_input = Utilities::split_string_list(raw_input);
+        E2 = Utilities::string_to_double(parsed_input);
+        raw_input = prm.get("Poisson's ratio 12");
+        parsed_input = Utilities::split_string_list(raw_input);
+        nu12 = Utilities::string_to_double(parsed_input);
+        raw_input = prm.get("Poisson's ratio 23");
+        parsed_input = Utilities::split_string_list(raw_input);
+        nu23 = Utilities::string_to_double(parsed_input);
+        raw_input = prm.get("Shear modulus");
+        parsed_input = Utilities::split_string_list(raw_input);
+        G12 = Utilities::string_to_double(parsed_input);
+      }
+
       raw_input = prm.get("Viscosity");
       parsed_input = Utilities::split_string_list(raw_input);
       eta = Utilities::string_to_double(parsed_input);
       AssertThrow(eta.size() == n_solid_parts,
                   ExcMessage("Inconsistent viscosity!"));
-
-      
-      
-      //fiber direction only considered for not isotropic materials
-      //need to fix this if statement, need to go through list of material types
-      //not sure if properly assigns fiber directions
-      raw_input = prm.get("Initial fiber direction");
-      parsed_input = Utilities::split_string_list(raw_input);
-      fiber = Utilities::string_to_double(parsed_input);
-      
-      //need to get dimension from Simulation section, and number of non-isotropic parts that need fiber direction
-      // int dimension = 2;
-      // AssertThrow(parsed_input.size() == n_solid_parts*dimension,
-      //           ExcMessage("Inconsistent fiber directions!"));
-      // for (unsigned int i = 0; i < n_solid_parts; i++)
-      // {
-      //   //TODO find how to set the ith vector as the next 2 or 3 inputs
-      //   fiber[i]
-      // }
-      
-
-      //copied from solid_neumann_type
-      // solid_neumann_bc_type = prm.get("Neumann boundary type");
-      // unsigned int tmp =
-      //   (solid_neumann_bc_type == "Traction" ? solid_neumann_bc_dim : 1);
-      // raw_input = prm.get("Neumann boundary values");
-      // parsed_input = Utilities::split_string_list(raw_input);
-      // std::vector<double> values = Utilities::string_to_double(parsed_input);
-      // AssertThrow(!n_solid_neumann_bcs ||
-      //               values.size() == tmp * n_solid_neumann_bcs,
-      //             ExcMessage("Inconsistent boundary values!"));
-      // for (unsigned int i = 0; i < n_solid_neumann_bcs; ++i)
-      //   {
-      //     std::vector<double> value;
-      //     for (unsigned int j = 0; j < tmp; ++j)
-      //       {
-      //         value.push_back(values[i * tmp + j]);
-      //       }
-      //     solid_neumann_bcs[ids[i]] = value;
-      //   }
-
-
-
       raw_input = prm.get("Hyperelastic parameters");
       parsed_input = Utilities::split_string_list(raw_input);
       // declare the size for each vector defining one hyperelastic material
@@ -714,6 +739,8 @@ namespace Parameters
     FluidNeumann::parseParameters(prm);
     SpalartAllmarasModel::parseParameters(prm);
     SolidFESystem::parseParameters(prm);
+    // Set dim for solid materials to obtain fiber vector length
+    solid_material_dim = dimension;
     SolidMaterial::parseParameters(prm);
     SolidSolver::parseParameters(prm);
     SolidDirichlet::parseParameters(prm);

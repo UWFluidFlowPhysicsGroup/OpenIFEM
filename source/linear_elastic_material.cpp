@@ -8,9 +8,14 @@ namespace Solid
                                                     double rho,
                                                     double eta,
                                                     std::string material_type,
-                                                    std::vector<double> initial_fiber
+                                                    dealii::Tensor<1, dim> initial_fiber,
+                                                    double young1,
+                                                    double young2,
+                                                    double poisson12,
+                                                    double poisson23,
+                                                    double shear12
                                                     )
-    : Material<dim>(rho), E(young), nu(poisson), eta(eta), material_type(material_type), initial_fiber(initial_fiber)
+    : Material<dim>(rho), E(young), nu(poisson), eta(eta), material_type(material_type), initial_fiber(initial_fiber), E1(young1), E2(young2), nu12(poisson12), nu23(poisson23), G12(shear12)
   {
     this->lambda = E * nu / ((1 + nu) * (1 - 2 * nu));
     this->mu = E / (2 * (1 + nu));
@@ -23,8 +28,6 @@ namespace Solid
   //create elasticity tensor for any material
   dealii::SymmetricTensor<4, dim> elasticity;
   
-  //Using if elses since switch statements do not work with strings
-  //Either this or change material type to integer in parameters file
   //Create isotropic material
   if (this->material_type == "Isotropic")
   {
@@ -45,21 +48,23 @@ namespace Solid
           }
       }
   //Create planar isotropic material
-  }else if(this->material_type == "PlanarIsotropic"){
-    //Variables and principal matrix creation
-    double E1 = 0, E2 = 0, G12 = 0, nu12 = 0, nu23 = 0;
-    //TODO import variable values from parameters, hard coding for now
-    E1 = 131e9; //GPa
-    E2 = 10.3e9; //GPa
-    nu12 = 0.22;
-    nu23 = 0.3;
-    G12 = 6.9e9; //GPa
+  }
+  else if(this->material_type == "PlanarIsotropic")
+  {
+    // //Variables and principal matrix creation
+    // double E1 = 0, E2 = 0, G12 = 0, nu12 = 0, nu23 = 0;
+    // //TODO import variable values from parameters, hard coding for now
+    // E1 = 131e9; //GPa
+    // E2 = 10.3e9; //GPa
+    // nu12 = 0.22;
+    // nu23 = 0.3;
+    // G12 = 6.9e9; //GPa
     /*
     TODO create JSON files that map the results of each if statement condition in 4d space, comprised of 1 and 0s (pseudo identity matrix)
     Then just run through each material type, multiply by that mapping matrix and add to elasticity matrix
     */
     //find k before filling elasticity tensor
-    const double constk = 1-2*(E2*(1+nu23)*pow(nu12,2))/E1-pow(nu23,2);
+    const double constk = 1-2*(this->E2*(1+this->nu23)*pow(this->nu12,2))/this->E1-pow(this->nu23,2);
     //TODO: defining G12 same as later on in the for loop, isotropic test case rn
     //G12 = (E1*(1-pow(nu23,2))-E2*nu12*(1+nu23))/(2*constk);
 
@@ -108,32 +113,32 @@ namespace Solid
 
                       if(m==1 && n==1)
                       {
-                        elasticity[i][j][k][l] = E1*(1-pow(nu23,2))/constk;
+                        elasticity[i][j][k][l] = this->E1*(1-pow(this->nu23,2))/constk;
                       }
                       else if((m==2 && n==2)||(m==3 && n==3))
                       {
-                        elasticity[i][j][k][l] = E2*(1-E2/E1*pow(nu12,2))/constk;
+                        elasticity[i][j][k][l] = this->E2*(1-this->E2/this->E1*pow(this->nu12,2))/constk;
                       }
                       else if(m==1 && (n==2 || n==3))
                       {
-                        elasticity[i][j][k][l] = E2*nu12*(1+nu23)/constk;
+                        elasticity[i][j][k][l] = this->E2*this->nu12*(1+this->nu23)/constk;
                         //applying symmetry along main diagonal (not automatically done for SymmetricTensor)
                         elasticity[k][l][i][j] = elasticity[i][j][k][l];
                       }
                       else if(m==2 && n==3)
                       {
-                        elasticity[i][j][k][l] = E2*(E2/E1*pow(nu12,2)+nu23)/constk;
+                        elasticity[i][j][k][l] = this->E2*(this->E2/this->E1*pow(this->nu12,2)+this->nu23)/constk;
                         //applying symmetry along main diagonal (not automatically done for SymmetricTensor)
                         elasticity[k][l][i][j] = elasticity[i][j][k][l];
                       }
                       else if(m==4 && n==4)
                       {
                         //C11 and C12 are already known based on order of for loops (all of i=1 is done first), but writing explicitly just to be safe
-                        elasticity[i][j][k][l] = (E1*(1-pow(nu23,2))-E2*nu12*(1+nu23))/(2*constk);
+                        elasticity[i][j][k][l] = (this->E1*(1-pow(this->nu23,2))-this->E2*this->nu12*(1+this->nu23))/(2*constk);
                       }
                       else if((m==5 && n==5)||(m==6 && n==6))
                       {
-                        elasticity[i][j][k][l] = G12;
+                        elasticity[i][j][k][l] = this->G12;
                       }
                     }
                 }
@@ -141,8 +146,9 @@ namespace Solid
         }
         
         //TODO find way to pass empty tensor without having to declare it first
-        dealii::Tensor<2, dim> emptyTensor;
-        elasticity = rotate_tensor(emptyTensor, elasticity);
+        //maybe just delete?
+        //dealii::Tensor<1, dim> emptyTensor;
+        //elasticity = rotate_tensor(emptyTensor, elasticity);
   } 
   return elasticity;
     
@@ -190,6 +196,9 @@ namespace Solid
     return viscosity;
   }
 
+  //TODO can look into default
+  //std optional SymmetricTensor
+  //set field as optional
   //Can also be used to rotate viscosity if anisotropic viscosity is required
   template <int dim>
   dealii::SymmetricTensor<4, dim>
@@ -224,7 +233,7 @@ namespace Solid
 
     double theta = current_fiberxy.norm() == 0 ? 0 : dealii::Physics::VectorRelations::angle(current_fiberxy, xaxis);
     //double theta = fiberxy.norm() == 0 ? 0 : (fiber[1] > 0 ? dealii::Physics::VectorRelations::angle(fiberxy, xaxis) : -dealii::Physics::VectorRelations::angle(fiberxy, xaxis));
-    theta = fiber[1] > 0 ? theta : -theta;
+    theta = current_fiber[1] > 0 ? theta : -theta;
   
     dealii::Tensor<2, dim> R = dealii::unit_symmetric_tensor<dim>(), Rz = dealii::unit_symmetric_tensor<dim>();
   
@@ -242,9 +251,12 @@ namespace Solid
     }
     else if(dim == 3)
     {
+      //TODO change to pre-defined constant:
+      //std::numbers::pi
       //3d case needs phi to account for components in the z direction, which is found using xy projection and full fiber direction
-      const double pi = 3.14159265358979323846;
-      double phi = current_fiberxy.norm() == 0 ? pi/2 : dealii::Physics::VectorRelations::angle(current_fiber, current_fiberxy);
+      //constexpr double pi = 3.14159265358979323846;
+      //const double pi = 3.14159265358979323846;
+      double phi = current_fiberxy.norm() == 0 ? M_PI/2 : dealii::Physics::VectorRelations::angle(current_fiber, current_fiberxy);
       phi = current_fiber[2] > 0 ? phi : -phi;
 
       dealii::Tensor<2, dim> Ry = dealii::unit_symmetric_tensor<dim>();
@@ -298,7 +310,7 @@ namespace Solid
   
   //Might move to solid_solver or utilities 
   template <int dim>
-  dealii::SymmetricTensor<1, dim>
+  dealii::Tensor<1, dim>
   LinearElasticMaterial<dim>::get_current_fiber_direction(dealii::Tensor<2, dim> deformation_gradient) const
   {
     dealii::Tensor<1, dim> current_fiber = (deformation_gradient + dealii::unit_symmetric_tensor<dim>())*this->initial_fiber;
