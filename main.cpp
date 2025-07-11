@@ -62,7 +62,7 @@ class Sim{
 };
 
 namespace {
-const std::string simMeshSolid[] = {"50x1000Beam"};
+const std::string simMeshSolid[] = {""};
 //Ability to set multiple fluid meshes to simplify fluid mesh refinement studies
 const std::string simMeshFluid[] = {""};
 const std::string meshPath = "meshes/";
