@@ -47,21 +47,22 @@ public:
   Sim();
   void loadSolid(std::string solidMeshName, Parameters::AllParameters params);
   void loadFluid(std::string fluidMeshName, Parameters::AllParameters params);
-  int setParams(Parameters::AllParameters params);
-  Triangulation<3> extrude();
-  int refine(int refinement);
+  void setParams(Parameters::AllParameters params);
+  //Triangulation<3> extrude(); 
+  //int refine(int refinement);
+  Solid::LinearElasticity<dim> solid;
+  Fluid::InsIM<dim> fluid;
 private:
   Triangulation<dim> triaSolid, triaFluid;
   DoFHandler<dim> dof_handler;
   GridIn<dim> gridIn;
-  Solid::LinearElasticity<dim> solid;
-  Fluid::InsIM<dim> fluid;
+
 };
 
 namespace {
 const std::string simMeshSolid[] = {"50x1000Beam"};
 //Ability to set multiple fluid meshes to simplify fluid mesh refinement studies
-const std::string simMeshFluid[] = {};
+const std::string simMeshFluid[] = {""};
 const std::string meshPath = "meshes/";
 const std::string paramsPath = "parameters.prm";
 GridOut gridOut;
@@ -77,11 +78,11 @@ Sim<dim>::Sim()
 template <int dim>
 void Sim<dim>::loadSolid(std::string solidMeshName, Parameters::AllParameters params){
   // Dynamically define path for solid mesh location
-  std::ifstream solidPath(meshPath + meshNameSolid + ".msh");
+  std::ifstream solidPath(meshPath + solidMeshName + ".msh");
   // Check if given mesh path is valid
   if (!solidPath){
     std::cerr << "----------------------------------------------------" << "\n"
-              << "ERROR FINDING SOLID MESH FILE " << meshNameSolid  << "\n"
+              << "ERROR FINDING SOLID MESH FILE " << solidMeshName  << "\n"
               << "----------------------------------------------------" << "\n";
     //exit the program
     exit(0);
@@ -99,13 +100,13 @@ void Sim<dim>::loadSolid(std::string solidMeshName, Parameters::AllParameters pa
 
 // Fluid object creation
 template <int dim>
-int Sim<dim>::loadFluid(std::string solidMeshName, Parameters::AllParameters params){
+void Sim<dim>::loadFluid(std::string fluidMeshName, Parameters::AllParameters params){
   // Dynamically define path for fluid mesh location
-  std::ifstream fluidPath(meshPath + meshNameFluid + ".msh");
+  std::ifstream fluidPath(meshPath + fluidMeshName + ".msh");
   // Check if given mesh path is valid
   if (!fluidPath){
     std::cerr << "----------------------------------------------------" << "\n"
-              << "ERROR FINDING FLUID MESH FILE " << meshNameFluid << "\n"
+              << "ERROR FINDING FLUID MESH FILE " << fluidMeshName << "\n"
               << "----------------------------------------------------" << "\n";
     exit(0);
   }
@@ -126,7 +127,7 @@ int Sim<dim>::loadFluid(std::string solidMeshName, Parameters::AllParameters par
 }
 
 template <int dim>
-int Sim<dim>::setParams(Parameters::AllParameters params){
+void Sim<dim>::setParams(Parameters::AllParameters params){
   //import params for both solid and fluid meshes separately
   //Solid::LinearElasticity<dim> solid(triaSolid, params);
   //Fluid::InsIM<dim> fluid(triaFluid, params);
@@ -149,12 +150,12 @@ int Sim<dim>::setParams(Parameters::AllParameters params){
 int main(){
   //read parameters file to determine the dimensions present
   Parameters::AllParameters params(paramsPath);
-  if (simMeshFluid.size == 0){
-    simMeshSolid[] = {""}
-  }
-  if (simMeshSolid.size == 0){
-    simMeshSolid[] = {""}
-  }
+  // if (simMeshFluid.size == 0){
+  //   simMeshSolid[] = {""}
+  // }
+  // if (simMeshSolid.size == 0){
+  //   simMeshSolid[] = {""}
+  // }
 
 
   //iterate through each fluid mesh that was given
@@ -177,7 +178,13 @@ int main(){
 
       } else if (params.dimension == 3){
         Sim<3> sim;
-        sim.loadMesh(meshSolid, meshFluid);
+
+        if(params.simulation_type == "Solid" || params.simulation_type == "FSI")
+          sim.loadSolid(meshSolid, params);
+
+        if (params.simulation_type == "Fluid" || params.simulation_type == "FSI")
+          sim.loadFluid(meshFluid, params);
+        
         sim.setParams(params);
         
       } else {

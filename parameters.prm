@@ -118,14 +118,42 @@ end
 subsection Solid material properties
   # Material type, currently LinearElastic, Kirchhoff and NeoHookean are available
   set Solid type = LinearElastic
+  
+  # Material Type, only Isotropic and PlanarIsotropic for linearelastic materials for now
+  set Material type = PlanarIsotropic
 
   # Solid density, used by all solid solvers
   set Solid density = 2.7
 
+  # Isotropic material properties
   # E and nu are only used by linearElasticMaterial
-  set Young's modulus = 1e5
+  set Young's modulus = 70e9
 
   set Poisson's ratio = 0.25
+
+  # Anisotropic material properties
+  # Initial fiber direction for non isotropic materials only. Expecting number of materials * dim values
+  set Initial fiber direction = 1, 0
+
+  # Young's modulus in fiber direction, only used for transverse isotropic materials
+  set Young's modulus 1 = 131e9
+  # 30e3
+
+  # Young's modulus pependicular to fiber direction, only used for transverse isotropic materials
+  set Young's modulus 2 = 10.3e9
+  # 1e3
+
+  # Poisson's ratio involving fiber direction, only used for transverse isotropic materials
+  set Poisson's ratio 12 = 0.22
+  # 0.57
+
+  # Poisson's ratio in plane of isotropy, only used for transverse isotropic materials
+  set Poisson's ratio 23 = 0.3
+  # 0.57
+
+  # Shear modulus involving fiber direction, only used for transverse isotropic materials
+  set Shear modulus = 6.9e9
+  # 13.9e3
 
   # A list of parameters used by hyperelasticMaterial
   set Hyperelastic parameters = 0.5, 1.67
@@ -176,5 +204,5 @@ subsection Solid Neumann BCs
   # If traction, dim*n_solid_neumann_bcs components are expected;
   # if pressure, n_solid_neumann_bcs components are expected. (dyne cm^-2) -> (0.1Pa)
   # traction sets values in x, y, z directions, pressure sets normal to original face direction
-  set Neumann boundary values = 0, -1e3
+  set Neumann boundary values = 0, -1e7
 end
