@@ -45,7 +45,8 @@ class Sim{
 public:
   //extern template class Solid::LinearElasticity<dim>;
   Sim();
-  int loadMesh(std::string meshNameSolid, std::string meshNameFluid);
+  void loadSolid(std::string solidMeshName, Parameters::AllParameters params);
+  void loadFluid(std::string fluidMeshName, Parameters::AllParameters params);
   int setParams(Parameters::AllParameters params);
   Triangulation<3> extrude();
   int refine(int refinement);
@@ -53,14 +54,16 @@ private:
   Triangulation<dim> triaSolid, triaFluid;
   DoFHandler<dim> dof_handler;
   GridIn<dim> gridIn;
+  Solid::LinearElasticity<dim> solid;
+  Fluid::InsIM<dim> fluid;
 };
 
 namespace {
-const std::string simMeshSolid = "leafletSolid";
+const std::string simMeshSolid[] = {"50x1000Beam"};
 //Ability to set multiple fluid meshes to simplify fluid mesh refinement studies
-const std::string simMeshFluid[] = {"leafletFluid_1799"};
+const std::string simMeshFluid[] = {};
 const std::string meshPath = "meshes/";
-const std::string paramsPath = "fsi_leaflet.prm";
+const std::string paramsPath = "parameters.prm";
 GridOut gridOut;
 }
 
@@ -70,20 +73,18 @@ Sim<dim>::Sim()
   : dof_handler(triaSolid) 
 {}
 
-//imports a mesh and outputs svg file in the XY plane
+//Solid object creation
 template <int dim>
-int Sim<dim>::loadMesh(std::string meshNameSolid, std::string meshNameFluid){
-  //identifies mesh to be imported from meshes folder
+void Sim<dim>::loadSolid(std::string solidMeshName, Parameters::AllParameters params){
+  // Dynamically define path for solid mesh location
   std::ifstream solidPath(meshPath + meshNameSolid + ".msh");
-  std::ifstream fluidPath(meshPath + meshNameFluid + ".msh");
-  //checks if desired mesh can be read
-  if (!solidPath || !fluidPath){
-    //Display error handler that file cannot be found
-    std::cerr << "----------------------------------------------------"
-              << "ERROR FINDING MESH FILES " << meshNameSolid << " OR " << meshNameFluid
-              << "----------------------------------------------------";
-    //return to kill the class
-    return 1;
+  // Check if given mesh path is valid
+  if (!solidPath){
+    std::cerr << "----------------------------------------------------" << "\n"
+              << "ERROR FINDING SOLID MESH FILE " << meshNameSolid  << "\n"
+              << "----------------------------------------------------" << "\n";
+    //exit the program
+    exit(0);
   }
 
   //define GridIn object to receive 2d mesh
@@ -91,104 +92,115 @@ int Sim<dim>::loadMesh(std::string meshNameSolid, std::string meshNameFluid){
   //imports mesh from selected area
   gridIn.read_msh(solidPath);
   
-  //repeat same for fluid mesh
+  Solid::LinearElasticity<dim> solid(triaSolid, params);
+  
+  return;
+}
+
+// Fluid object creation
+template <int dim>
+int Sim<dim>::loadFluid(std::string solidMeshName, Parameters::AllParameters params){
+  // Dynamically define path for fluid mesh location
+  std::ifstream fluidPath(meshPath + meshNameFluid + ".msh");
+  // Check if given mesh path is valid
+  if (!fluidPath){
+    std::cerr << "----------------------------------------------------" << "\n"
+              << "ERROR FINDING FLUID MESH FILE " << meshNameFluid << "\n"
+              << "----------------------------------------------------" << "\n";
+    exit(0);
+  }
+
+  //define GridIn object to receive fluid mesh
   gridIn.attach_triangulation(triaFluid);
+  //imports the fluid mesh from the valid file path
   gridIn.read_msh(fluidPath);
 
-  //Exports meshes to .msh file for debugging
+  Fluid::InsIM<dim> fluid(triaFluid, params);
+  
+  return;
+  //Example of exporting fluid mesh for debugging/checking what is used
   /*
-  std::ofstream out(meshNameSolid + ".msh");
   std::ofstream out(meshNameFluid + ".msh");
-  gridOut.write_msh(triaSolid, out);
   gridOut.write_msh(triaFluid, out);
   */
-  return 0;
 }
 
 template <int dim>
 int Sim<dim>::setParams(Parameters::AllParameters params){
   //import params for both solid and fluid meshes separately
-  Solid::LinearElasticity<dim> solid(triaSolid, params);
-  Fluid::InsIM<dim> fluid(triaFluid, params);
-  //combine solid and fluid meshes to make FSI simulation
-  FSI<dim> fsi(fluid, solid, params, true);
-  fsi.run();
+  //Solid::LinearElasticity<dim> solid(triaSolid, params);
+  //Fluid::InsIM<dim> fluid(triaFluid, params);
   
-  return 0;
+  if (params.simulation_type == "Solid"){
+    solid.run();
+  }else if(params.simulation_type == "Fluid"){
+    fluid.run();
+  }else if(params.simulation_type == "FSI"){
+    //combine solid and fluid meshes to make FSI simulation
+    FSI<dim> fsi(fluid, solid, params, true);
+    fsi.run();
+  }else{
+    //error occured
+    exit(0);
+  }
+  return;
 }
-
 
 int main(){
   //read parameters file to determine the dimensions present
   Parameters::AllParameters params(paramsPath);
-  
+  if (simMeshFluid.size == 0){
+    simMeshSolid[] = {""}
+  }
+  if (simMeshSolid.size == 0){
+    simMeshSolid[] = {""}
+  }
+
+
   //iterate through each fluid mesh that was given
   for(const std::string &meshFluid : simMeshFluid){
-    //This section has to be hard coded, since the creation of the Sim object requires a constant variable input
-    //the value of ‘dims’ is not usable in a constant expression
-    if (params.dimension == 2){
-      Sim<2> sim;
-      sim.loadMesh(simMeshSolid, meshFluid);
-      sim.setParams(params);
+    //iterate through each solid mesh
+    for(const std::string &meshSolid : simMeshSolid){
+      //This section has to be hard coded, since the creation of the Sim object requires a constant variable input
+      //the value of ‘dims’ is not usable in a constant expression
+      if (params.dimension == 2){
+        Sim<2> sim;
 
-      /*Keeping extrude and refine functions commented out for future reference
-      sim.extrude();
-      for(int i = 1; i <= 2; i++){
-        sim.refine(i);
-      } */ 
-    } else if (params.dimension == 3){
-      Sim<3> sim;
-      sim.loadMesh(simMeshSolid, meshFluid);
-      sim.setParams(params);
-      
-      /*
-      for(int i = 1; i <= 2; i++){
-        sim.refine(i);
-      }*/
-    } else {
-      std::cerr << "Cannot find dimension from parameters file" << std::endl
-                << "Check if " << paramsPath << "exists";
-      return 1;
-    }
+        if(params.simulation_type == "Solid" || params.simulation_type == "FSI")
+          sim.loadSolid(meshSolid, params);
 
-    //define path to current file location
-    std::filesystem::path p = std::filesystem::current_path();
-    //create folder with a title corresponding to the current fluid mesh name
-    std::filesystem::create_directory(p / meshFluid);
+        if (params.simulation_type == "Fluid" || params.simulation_type == "FSI")
+          sim.loadFluid(meshFluid, params);
 
-    //iterate through each file in the main directory
-    for(const auto& dirEntry : std::filesystem::directory_iterator(p)){
-      //checks if each file is a .vtu or .pvd file
-      //since these are main outputs for each test case, want to move them somewhere safe before starting another simulation
-      if (dirEntry.path().extension() == ".vtu" || dirEntry.path().extension() == ".pvd"){
-        //moves the "selected" outputs to the new folder corresponding to the fluid mesh name
-        std::filesystem::rename(p / dirEntry.path().filename(), p / meshFluid / dirEntry.path().filename());
+        //sim.loadMesh(meshSolid, meshFluid);
+        sim.setParams(params);
+
+      } else if (params.dimension == 3){
+        Sim<3> sim;
+        sim.loadMesh(meshSolid, meshFluid);
+        sim.setParams(params);
+        
+      } else {
+        std::cerr << "Cannot find dimension from parameters file" << std::endl
+                  << "Check if " << paramsPath << "exists or has valid dimensions";
+        return 1;
       }
+
+      //define path to current file location
+      std::filesystem::path p = std::filesystem::current_path();
+      //create folder with a title corresponding to the current fluid mesh name
+      std::filesystem::create_directory(p / meshFluid);
+
+      //iterate through each file in the main directory
+      for(const auto& dirEntry : std::filesystem::directory_iterator(p)){
+        //checks if each file is a .vtu or .pvd file
+        //since these are main outputs for each test case, want to move them somewhere safe before starting another simulation
+        if (dirEntry.path().extension() == ".vtu" || dirEntry.path().extension() == ".pvd"){
+          //moves the "selected" outputs to the new folder corresponding to the fluid mesh name
+          std::filesystem::rename(p / dirEntry.path().filename(), p / meshFluid / meshSolid / dirEntry.path().filename());
+        }
+      }
+    
     }
   }
 }
-
-/*
-Commented out extrude and refine functions because focusing on 2d shape first and refining in gmsh instead of c++ dealii
-//takes input 2d mesh from before and extrudes to a 3d shape, exports shape to .geo file
-template <int dim>
-Triangulation<3> Sim<dim>::extrude(){
-  Triangulation<3> tria3d;  
-  //2d input, number of slices, height, output height, output triangulation
-  GridGenerator::extrude_triangulation(tria2d, 7, 12.0, tria3d);
-  std::ofstream out(meshPath + "vocalFold3d.msh");
-  gridOut.write_msh(tria3d, out);
-  return 0;
-}
-
-template <int dim>
-int Sim<dim>::refine(int refinement){
-  //refine_global is set to 1 subdivision because mesh is subdivided from previous loop 
-  //one further step into refinement
-  tria.refine_global(1);
-  //output the refined mesh with a different name based on refinement level
-  std::ofstream out(meshPath + "vocalFold3d" + std::to_string(refinement) + ".msh");
-  gridOut.write_msh(tria, out);
-  return 0;
-}
-*/
