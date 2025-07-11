@@ -42,20 +42,22 @@ using namespace dealii;
 //Vars in unnamed namespace to avoid reading from other files
 template <int dim>
 class Sim{
-public:
-  //extern template class Solid::LinearElasticity<dim>;
-  Sim();
-  void loadSolid(std::string solidMeshName, Parameters::AllParameters params);
-  void loadFluid(std::string fluidMeshName, Parameters::AllParameters params);
-  void setParams(Parameters::AllParameters params);
-  //Triangulation<3> extrude(); 
-  //int refine(int refinement);
-  Solid::LinearElasticity<dim> solid;
-  Fluid::InsIM<dim> fluid;
-private:
-  Triangulation<dim> triaSolid, triaFluid;
-  DoFHandler<dim> dof_handler;
-  GridIn<dim> gridIn;
+  public:
+    //extern template class Solid::LinearElasticity<dim>;
+    Sim();
+    void loadSolid(std::string solidMeshName);
+    void loadFluid(std::string fluidMeshName);
+    void setParams(Parameters::AllParameters params);
+    //Triangulation<3> extrude(); 
+    //int refine(int refinement);
+    //is this expecting to call a function?
+    // Solid::LinearElasticity<dim> solid(Triangulation<dim> triaSolid, Parameters::AllParameters params);
+    // Fluid::InsIM<dim> fluid(Triangulation<dim> triaFluid, Parameters::AllParameters params);
+
+  private:
+    Triangulation<dim> triaSolid, triaFluid;
+    DoFHandler<dim> dof_handler;
+    GridIn<dim> gridIn;
 
 };
 
@@ -76,7 +78,7 @@ Sim<dim>::Sim()
 
 //Solid object creation
 template <int dim>
-void Sim<dim>::loadSolid(std::string solidMeshName, Parameters::AllParameters params){
+void Sim<dim>::loadSolid(std::string solidMeshName){
   // Dynamically define path for solid mesh location
   std::ifstream solidPath(meshPath + solidMeshName + ".msh");
   // Check if given mesh path is valid
@@ -93,14 +95,12 @@ void Sim<dim>::loadSolid(std::string solidMeshName, Parameters::AllParameters pa
   //imports mesh from selected area
   gridIn.read_msh(solidPath);
   
-  Solid::LinearElasticity<dim> solid(triaSolid, params);
-  
   return;
 }
 
 // Fluid object creation
 template <int dim>
-void Sim<dim>::loadFluid(std::string fluidMeshName, Parameters::AllParameters params){
+void Sim<dim>::loadFluid(std::string fluidMeshName){
   // Dynamically define path for fluid mesh location
   std::ifstream fluidPath(meshPath + fluidMeshName + ".msh");
   // Check if given mesh path is valid
@@ -116,8 +116,6 @@ void Sim<dim>::loadFluid(std::string fluidMeshName, Parameters::AllParameters pa
   //imports the fluid mesh from the valid file path
   gridIn.read_msh(fluidPath);
 
-  Fluid::InsIM<dim> fluid(triaFluid, params);
-  
   return;
   //Example of exporting fluid mesh for debugging/checking what is used
   /*
@@ -133,11 +131,15 @@ void Sim<dim>::setParams(Parameters::AllParameters params){
   //Fluid::InsIM<dim> fluid(triaFluid, params);
   
   if (params.simulation_type == "Solid"){
+    Solid::LinearElasticity<dim> solid(triaSolid, params);
     solid.run();
   }else if(params.simulation_type == "Fluid"){
+    Fluid::InsIM<dim> fluid(triaFluid, params);
     fluid.run();
   }else if(params.simulation_type == "FSI"){
     //combine solid and fluid meshes to make FSI simulation
+    Solid::LinearElasticity<dim> solid(triaSolid, params);
+    Fluid::InsIM<dim> fluid(triaFluid, params);
     FSI<dim> fsi(fluid, solid, params, true);
     fsi.run();
   }else{
@@ -150,13 +152,6 @@ void Sim<dim>::setParams(Parameters::AllParameters params){
 int main(){
   //read parameters file to determine the dimensions present
   Parameters::AllParameters params(paramsPath);
-  // if (simMeshFluid.size == 0){
-  //   simMeshSolid[] = {""}
-  // }
-  // if (simMeshSolid.size == 0){
-  //   simMeshSolid[] = {""}
-  // }
-
 
   //iterate through each fluid mesh that was given
   for(const std::string &meshFluid : simMeshFluid){
@@ -168,10 +163,10 @@ int main(){
         Sim<2> sim;
 
         if(params.simulation_type == "Solid" || params.simulation_type == "FSI")
-          sim.loadSolid(meshSolid, params);
+          sim.loadSolid(meshSolid);
 
         if (params.simulation_type == "Fluid" || params.simulation_type == "FSI")
-          sim.loadFluid(meshFluid, params);
+          sim.loadFluid(meshFluid);
 
         //sim.loadMesh(meshSolid, meshFluid);
         sim.setParams(params);
@@ -180,31 +175,42 @@ int main(){
         Sim<3> sim;
 
         if(params.simulation_type == "Solid" || params.simulation_type == "FSI")
-          sim.loadSolid(meshSolid, params);
+          sim.loadSolid(meshSolid);
 
         if (params.simulation_type == "Fluid" || params.simulation_type == "FSI")
-          sim.loadFluid(meshFluid, params);
+          sim.loadFluid(meshFluid);
         
         sim.setParams(params);
         
       } else {
         std::cerr << "Cannot find dimension from parameters file" << std::endl
                   << "Check if " << paramsPath << "exists or has valid dimensions";
-        return 1;
+        exit(0);
       }
 
       //define path to current file location
       std::filesystem::path p = std::filesystem::current_path();
+      
+      std::string outputFolder;
+      if (params.simulation_type == "Solid"){
+        outputFolder = meshSolid;
+      }else if(params.simulation_type == "Fluid"){
+        outputFolder = meshFluid;
+      }else if(params.simulation_type == "FSI"){
+        outputFolder = meshSolid + "_" + meshFluid;
+      }  
+      //TODO change meshFluid call to a new output file name
       //create folder with a title corresponding to the current fluid mesh name
-      std::filesystem::create_directory(p / meshFluid);
+      std::filesystem::create_directory(p / outputFolder);
 
       //iterate through each file in the main directory
       for(const auto& dirEntry : std::filesystem::directory_iterator(p)){
         //checks if each file is a .vtu or .pvd file
         //since these are main outputs for each test case, want to move them somewhere safe before starting another simulation
         if (dirEntry.path().extension() == ".vtu" || dirEntry.path().extension() == ".pvd"){
+          
           //moves the "selected" outputs to the new folder corresponding to the fluid mesh name
-          std::filesystem::rename(p / dirEntry.path().filename(), p / meshFluid / meshSolid / dirEntry.path().filename());
+          std::filesystem::rename(p / dirEntry.path().filename(), p / outputFolder / dirEntry.path().filename());
         }
       }
     

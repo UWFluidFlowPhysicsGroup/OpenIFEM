@@ -24,7 +24,7 @@ subsection Simulation
   set Time step size = 1e-2
 
   # The output interval frequency
-  set Output interval = 1
+  set Output interval = 1e-2
 
   # Mesh refinement interval in second
   set Refinement interval = 1000
@@ -40,7 +40,7 @@ subsection Simulation
   
   # Set condition for calculating indicator field (only applied to OpenIFEM-SABLE Coupling)
   # Options: CompletelyInsideSolid and PartiallyInsideSolid
-  set Indicator field condition = CompletelyInsideSolid
+  #set Indicator field condition = CompletelyInsideSolid
 end
 
 # --------------------------------------------------------------------------------

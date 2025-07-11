@@ -1,6 +1,3 @@
-/meshes
-/meshes/*.STEP
-/meshes/*.SLDPRT
 *.Identifier
 notes.md
 *.svg
