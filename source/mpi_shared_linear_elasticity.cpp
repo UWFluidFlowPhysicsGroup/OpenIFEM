@@ -543,15 +543,15 @@ namespace Solid
                       qpt_to_dof.vmult(cell_strain[i][j], quad_strain[i][j]);
                       qpt_to_dof.vmult(cell_stress[i][j], quad_stress[i][j]);
                       
-                      if (material[mat_id - 1].material_type != "Isotropic" && j == 0)
-                      qpt_to_dof.vmult(cell_fiber[i], quad_fiber[i]);
+                      // if (material[mat_id - 1].material_type != "Isotropic" && j == 0)
+                      // qpt_to_dof.vmult(cell_fiber[i], quad_fiber[i]);
 
                       scalar_cell->distribute_local_to_global(cell_strain[i][j],
                                                               strain[i][j]);
                       scalar_cell->distribute_local_to_global(cell_stress[i][j],
                                                               stress[i][j]);
-                      scalar_cell->distribute_local_to_global(cell_fiber[i],
-                                                              fiber[i]);
+                      // scalar_cell->distribute_local_to_global(cell_fiber[i],
+                      //                                         fiber[i]);
                     }
                 }
               scalar_cell->distribute_local_to_global(local_sorrounding_cells,
@@ -562,7 +562,7 @@ namespace Solid
 
       for (unsigned int i = 0; i < dim; ++i)
         {
-          fiber[i].compress(VectorOperation::add);
+          // fiber[i].compress(VectorOperation::add);
           for (unsigned int j = 0; j < dim; ++j)
             {
               strain[i][j].compress(VectorOperation::add);
@@ -575,15 +575,15 @@ namespace Solid
                 {
                   strain[i][j][k] /= surrounding_cells[k];
                   stress[i][j][k] /= surrounding_cells[k];
-                  fiber[dim*k] /= surrounding_cells[k];
-                  fiber[dim*k + 1] /= surrounding_cells[k];
-                  if (dim == 3)
-                    fiber[dim*k + 2] /= surrounding_cells[k];
+                  // fiber[dim*k] /= surrounding_cells[k];
+                  // fiber[dim*k + 1] /= surrounding_cells[k];
+                  // if (dim == 3)
+                  //   fiber[dim*k + 2] /= surrounding_cells[k];
                 }
               strain[i][j].compress(VectorOperation::insert);
               stress[i][j].compress(VectorOperation::insert);
             }
-          fiber[i].compress(VectorOperation::insert);
+          // fiber[i].compress(VectorOperation::insert);
           }
     }
 

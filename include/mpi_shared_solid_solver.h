@@ -215,6 +215,8 @@ namespace Solid
        */
       mutable std::vector<std::vector<PETScWrappers::MPI::Vector>> strain,
         stress;
+      
+      Vector<double> fiber;
 
       MPI_Comm mpi_communicator;
       const unsigned int n_mpi_processes;
