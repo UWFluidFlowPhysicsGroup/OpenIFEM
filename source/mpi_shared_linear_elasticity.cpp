@@ -14,8 +14,6 @@ namespace Solid
       material.resize(parameters.n_solid_parts, LinearElasticMaterial<dim>());
       for (unsigned int i = 0; i < parameters.n_solid_parts; ++i)
         {
-        //TODO fix issue with calling fiber as vector in parameters, might have issue only calling the first dimension of the fiber "tensor"
-        //TODO create temp variable for fiber direction, dealii::Tensor object
         dealii::Tensor<1,dim> tmp_fiber;
         if (parameters.material_type[i] != "Isotropic"){
           for (unsigned int j = 0; j < dim; j++){
@@ -447,6 +445,14 @@ namespace Solid
         std::vector<Vector<double>>(
           dim, Vector<double>(volume_quad_formula.size())));
 
+      //fiber direction values
+      std::vector<Vector<double>> cell_fiber(
+        std::vector<Vector<double>>(dim,
+                                    Vector<double>(scalar_fe.dofs_per_cell)));
+      std::vector<Vector<double>> quad_fiber(
+        std::vector<Vector<double>>(dim,
+                                    Vector<double>(volume_quad_formula.size())));
+
       // Displacement gradients at quadrature points.
       std::vector<Tensor<2, dim>> current_displacement_gradients(
         volume_quad_formula.size());
@@ -485,6 +491,29 @@ namespace Solid
 
               for (unsigned int q = 0; q < volume_quad_formula.size(); ++q)
                 {
+                  if (material[mat_id - 1].material_type != "Isotropic")
+                  {
+                    //Create tensor for elasticity tensor in principal coordinates
+                    //need to get elasticity again for each quadrature point
+                    dealii::SymmetricTensor<4, dim> elasticity_principal = material[mat_id - 1].get_elasticity();
+                  
+                    dealii::Tensor<2, dim> tmp_current_displacement_gradients;
+                    
+                    for (unsigned int i=0; i < dim; ++i){
+                      for (unsigned int j=0; j < dim; ++j){
+                        tmp_current_displacement_gradients[i][j] = current_displacement_gradients[q][i][j];
+                      }
+
+                    }
+                    dealii::Tensor<1,dim> tmp_fiber = material[mat_id - 1].get_current_fiber_direction(tmp_current_displacement_gradients);
+                    for (unsigned int i=0; i < dim; ++i)
+                    {
+                      quad_fiber[i][q] = tmp_fiber[i];        
+                    }
+
+                    elasticity = material[mat_id - 1].rotate_tensor(tmp_fiber, elasticity_principal);
+                  }
+
                   SymmetricTensor<2, dim> tmp_strain, tmp_stress;
                   for (unsigned int i = 0; i < dim; ++i)
                     {
@@ -513,10 +542,16 @@ namespace Solid
                     {
                       qpt_to_dof.vmult(cell_strain[i][j], quad_strain[i][j]);
                       qpt_to_dof.vmult(cell_stress[i][j], quad_stress[i][j]);
+                      
+                      if (material[mat_id - 1].material_type != "Isotropic" && j == 0)
+                      qpt_to_dof.vmult(cell_fiber[i], quad_fiber[i]);
+
                       scalar_cell->distribute_local_to_global(cell_strain[i][j],
                                                               strain[i][j]);
                       scalar_cell->distribute_local_to_global(cell_stress[i][j],
                                                               stress[i][j]);
+                      scalar_cell->distribute_local_to_global(cell_fiber[i],
+                                                              fiber[i]);
                     }
                 }
               scalar_cell->distribute_local_to_global(local_sorrounding_cells,
@@ -527,6 +562,7 @@ namespace Solid
 
       for (unsigned int i = 0; i < dim; ++i)
         {
+          fiber[i].compress(VectorOperation::add);
           for (unsigned int j = 0; j < dim; ++j)
             {
               strain[i][j].compress(VectorOperation::add);
@@ -539,11 +575,16 @@ namespace Solid
                 {
                   strain[i][j][k] /= surrounding_cells[k];
                   stress[i][j][k] /= surrounding_cells[k];
+                  fiber[dim*k] /= surrounding_cells[k];
+                  fiber[dim*k + 1] /= surrounding_cells[k];
+                  if (dim == 3)
+                    fiber[dim*k + 2] /= surrounding_cells[k];
                 }
               strain[i][j].compress(VectorOperation::insert);
               stress[i][j].compress(VectorOperation::insert);
             }
-        }
+          fiber[i].compress(VectorOperation::insert);
+          }
     }
 
     template class SharedLinearElasticity<2>;

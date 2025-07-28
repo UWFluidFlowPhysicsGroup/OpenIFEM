@@ -55,6 +55,7 @@ namespace Solid
     using SolidSolver<2, 3>::current_displacement;
     using SolidSolver<2, 3>::strain;
     using SolidSolver<2, 3>::stress;
+    using SolidSolver<1, 3>::fiber;
     using SolidSolver<2, 3>::time;
     using SolidSolver<2, 3>::timer;
     using SolidSolver<2, 3>::cell_property;

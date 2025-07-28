@@ -12,8 +12,6 @@ namespace Solid
     material.resize(parameters.n_solid_parts, LinearElasticMaterial<dim>());
     for (unsigned int i = 0; i < parameters.n_solid_parts; ++i)
       {
-        //TODO fix issue with calling fiber as vector in parameters, might have issue only calling the first dimension of the fiber "tensor"
-        //TODO create temp variable for fiber direction, dealii::Tensor object
         dealii::Tensor<1,dim> tmp_fiber;
         if (parameters.material_type[i] != "Isotropic"){
           for (unsigned int j = 0; j < dim; j++){
@@ -407,13 +405,10 @@ namespace Solid
         
         for (unsigned int q = 0; q < volume_quad_formula.size(); ++q)
           {
-            //TODO: Code for anisotropy, commented out code that should work for parameters file integration, should move to its own function to rotate vector direction
-            //if (parameters.solid_type != "isotropic"){
             if (material[mat_id - 1].material_type != "Isotropic")
             {
               //Create tensor for elasticity tensor in principal coordinates
               //need to get elasticity again for each quadrature point
-              //dont need, can just use regular elasticity above
               dealii::SymmetricTensor<4, dim> elasticity_principal = material[mat_id - 1].get_elasticity();
              
               dealii::Tensor<2, dim> tmp_current_displacement_gradients;

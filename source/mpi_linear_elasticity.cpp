@@ -15,8 +15,6 @@ namespace Solid
       material.resize(parameters.n_solid_parts, LinearElasticMaterial<dim>());
       for (unsigned int i = 0; i < parameters.n_solid_parts; ++i)
         {
-        //TODO fix issue with calling fiber as vector in parameters, might have issue only calling the first dimension of the fiber "tensor"
-        //TODO create temp variable for fiber direction, dealii::Tensor object
         dealii::Tensor<1,dim> tmp_fiber;
         if (parameters.material_type[i] != "Isotropic"){
           for (unsigned int j = 0; j < dim; j++){

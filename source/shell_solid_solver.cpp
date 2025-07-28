@@ -48,6 +48,7 @@ namespace Solid
       3,
       std::vector<Vector<double>>(3,
                                   Vector<double>(scalar_dof_handler.n_dofs())));
+    fiber.reinit(dof_handler.n_dofs());
 
     // Set up cell property, which contains the FSI traction required in FSI
     // simulation
@@ -240,12 +241,27 @@ namespace Solid
                              data_component_interpretation);
 
     // strain and stress
+    data_out.add_data_vector(scalar_dof_handler, strain[0][0], "Exx");
+    data_out.add_data_vector(scalar_dof_handler, strain[0][1], "Exy");
+    data_out.add_data_vector(scalar_dof_handler, strain[1][1], "Eyy");
     data_out.add_data_vector(scalar_dof_handler, stress[0][0], "Sxx");
     data_out.add_data_vector(scalar_dof_handler, stress[0][1], "Sxy");
     data_out.add_data_vector(scalar_dof_handler, stress[1][1], "Syy");
-    data_out.add_data_vector(scalar_dof_handler, stress[0][2], "Sxz");
-    data_out.add_data_vector(scalar_dof_handler, stress[1][2], "Syz");
-    data_out.add_data_vector(scalar_dof_handler, stress[2][2], "Szz");
+    if (spacedim == 3)
+      {
+        data_out.add_data_vector(scalar_dof_handler, strain[0][2], "Exz");
+        data_out.add_data_vector(scalar_dof_handler, strain[1][2], "Eyz");
+        data_out.add_data_vector(scalar_dof_handler, strain[2][2], "Ezz");
+        data_out.add_data_vector(scalar_dof_handler, stress[0][2], "Sxz");
+        data_out.add_data_vector(scalar_dof_handler, stress[1][2], "Syz");
+        data_out.add_data_vector(scalar_dof_handler, stress[2][2], "Szz");
+      }
+
+      solution_names = std::vector<std::string>(spacedim, "fiber direction");
+      data_out.add_data_vector(dof_handler,
+                             fiber,
+                             solution_names,
+                             data_component_interpretation);
 
     data_out.build_patches();
 
