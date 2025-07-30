@@ -62,7 +62,7 @@ class Sim{
 };
 
 namespace {
-const std::string simMeshSolid[] = {""};
+const std::string simMeshSolid[] = {"SquareMeshDualMat_coarse", "SquareMeshDualMat"};
 //Ability to set multiple fluid meshes to simplify fluid mesh refinement studies
 const std::string simMeshFluid[] = {""};
 const std::string meshPath = "meshes/";
