@@ -392,6 +392,10 @@ namespace Solid
     auto cell = dof_handler.begin_active();
     auto scalar_cell = scalar_dof_handler.begin_active();
     std::vector<types::global_dof_index> dof_indices(scalar_fe.dofs_per_cell);
+    
+    //set random seed to 0, so random fiber directions should be the same for each stress update iteration
+    srand(1);
+
     for (; cell != dof_handler.end(); ++cell, ++scalar_cell)
       {
         scalar_cell->get_dof_indices(dof_indices);
@@ -403,6 +407,13 @@ namespace Solid
           mat_id = 1;
         elasticity = material[mat_id - 1].get_elasticity();
         
+        dealii::Tensor<1,dim> rnd_fiber;
+        if (mat_id == 1){
+          //get new random fiber direction values for all quad points in a single cell
+          rnd_fiber[0] = (std::rand()-double(RAND_MAX)/2);
+          rnd_fiber[1] = (std::rand()-double(RAND_MAX)/2);
+        }
+
         for (unsigned int q = 0; q < volume_quad_formula.size(); ++q)
           {
             if (material[mat_id - 1].material_type != "Isotropic")
@@ -417,12 +428,20 @@ namespace Solid
                 for (unsigned int j=0; j < dim; ++j){
                   tmp_current_displacement_gradients[i][j] = current_displacement_gradients[q][i][j];
                 }
-
               }
+              
               dealii::Tensor<1,dim> tmp_fiber = material[mat_id - 1].get_current_fiber_direction(tmp_current_displacement_gradients);
+              //TODO add case for random material id seeded using srand(cell->id)
+              //srand defines the starting seed number, but still use rand() to get the randomized value out
+              if (mat_id == 1){
+                // tmp_fiber[0] = (std::rand()-double(RAND_MAX)/2);
+                // tmp_fiber[1] = (std::rand()-double(RAND_MAX)/2);
+                tmp_fiber = (tmp_current_displacement_gradients + dealii::unit_symmetric_tensor<dim>())*rnd_fiber;
+              }
               for (unsigned int i=0; i < dim; ++i)
               {
-                quad_fiber[i][q] = tmp_fiber[i];        
+                
+                quad_fiber[i][q] = tmp_fiber[i];
               }
 
               elasticity = material[mat_id - 1].rotate_tensor(tmp_fiber, elasticity_principal);

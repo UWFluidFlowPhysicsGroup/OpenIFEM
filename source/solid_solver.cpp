@@ -200,11 +200,11 @@ namespace Solid
     // otherwise breaks all the previous test cases
     // if (material_type != "Isotropic")
     // {
-      // solution_names = std::vector<std::string>(spacedim, "fiber direction");
-      // data_out.add_data_vector(dof_handler,
-      //                        fiber,
-      //                        solution_names,
-      //                        data_component_interpretation);
+      solution_names = std::vector<std::string>(spacedim, "fiber direction");
+      data_out.add_data_vector(dof_handler,
+                             fiber,
+                             solution_names,
+                             data_component_interpretation);
     // }
 
 
