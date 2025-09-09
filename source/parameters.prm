@@ -133,6 +133,12 @@ subsection Solid material properties
   # Material type, currently LinearElastic, NeoHookean and Kirchhoff are available
   set Solid type = LinearElastic
 
+  # Number of different materials used in solid
+  set Number of solid parts = 1
+
+  # Material Type, only Isotropic and PlanarIsotropic for linearelastic materials for now
+  set Material type = PlanarIsotropic
+
   # Solid density, used by all solid solvers
   set Solid density = 1
 
@@ -140,6 +146,25 @@ subsection Solid material properties
   set Young's modulus = 2.5
 
   set Poisson's ratio = 0.25
+
+  # Anisotropic material properties
+  # Initial fiber direction for non isotropic materials only. Expecting number of materials * dim values
+  set Initial fiber direction = 0, 1
+
+  # Young's modulus (Pa) in fiber direction, only used for transverse isotropic materials
+  set Young's modulus 1 = 1
+
+  # Young's modulus (Pa) pependicular to fiber direction, only used for transverse isotropic materials
+  set Young's modulus 2 = 1
+
+  # Poisson's ratio involving fiber direction, only used for transverse isotropic materials
+  set Poisson's ratio 12 = 0.25
+
+  # Poisson's ratio in plane of isotropy, only used for transverse isotropic materials
+  set Poisson's ratio 23 = 0.25
+
+  # Shear modulus (Pa) involving fiber direction, only used for transverse isotropic materials
+  set Shear modulus = 1
 
   set Viscosity = 0.0
 

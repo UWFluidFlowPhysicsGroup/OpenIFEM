@@ -51,22 +51,7 @@ namespace Solid
   }
   else if(this->material_type == "PlanarIsotropic")
   {
-    // //Variables and principal matrix creation
-    // double E1 = 0, E2 = 0, G12 = 0, nu12 = 0, nu23 = 0;
-    // //TODO import variable values from parameters, hard coding for now
-    // E1 = 131e9; //GPa
-    // E2 = 10.3e9; //GPa
-    // nu12 = 0.22;
-    // nu23 = 0.3;
-    // G12 = 6.9e9; //GPa
-    /*
-    TODO create JSON files that map the results of each if statement condition in 4d space, comprised of 1 and 0s (pseudo identity matrix)
-    Then just run through each material type, multiply by that mapping matrix and add to elasticity matrix
-    */
-    //find k before filling elasticity tensor
     const double constk = 1-2*(this->E2*(1+this->nu23)*pow(this->nu12,2))/this->E1-pow(this->nu23,2);
-    //TODO: defining G12 same as later on in the for loop, isotropic test case rn
-    //G12 = (E1*(1-pow(nu23,2))-E2*nu12*(1+nu23))/(2*constk);
 
     //SymmetricTensor object automatically applies symmetries in ijkl=jikl=ijlk, but still need to manually input ijkl=klij
     int m=0, n=0;
@@ -78,8 +63,6 @@ namespace Solid
                 {
                   for (unsigned int l = 0; l < dim; ++l)
                     {
-                      //Create temporary indices m, n to write equivalent Voigt notation for ijkl, makes it easier to process and visualize each case
-                      //TODO make another function to convert Einstein to Voigt? (input a, b and output c to avoid duplicate loops for m, n?)
                       m=0;
                       n=0;
 
@@ -144,33 +127,8 @@ namespace Solid
                 }
             }
         }
-        
-        //TODO find way to pass empty tensor without having to declare it first
-        //maybe just delete?
-        //dealii::Tensor<1, dim> emptyTensor;
-        //elasticity = rotate_tensor(emptyTensor, elasticity);
   } 
   return elasticity;
-    
-    /*
-    dealii::SymmetricTensor<4, dim> elasticity;
-    for (unsigned int i = 0; i < dim; ++i)
-      {
-        for (unsigned int j = 0; j < dim; ++j)
-          {
-            for (unsigned int k = 0; k < dim; ++k)
-              {
-                for (unsigned int l = 0; l < dim; ++l)
-                  {
-                    elasticity[i][j][k][l] =
-                      (i == k && j == l ? this->mu : 0.0) +
-                      (i == l && j == k ? this->mu : 0.0) +
-                      (i == j && k == l ? this->lambda : 0.0);
-                  }
-              }
-          }
-      }
-    return elasticity;*/
   }
 
   template <int dim>
@@ -204,28 +162,6 @@ namespace Solid
   dealii::SymmetricTensor<4, dim>
   LinearElasticMaterial<dim>::rotate_tensor(dealii::Tensor<1, dim> current_fiber, dealii::SymmetricTensor<4, dim> elasticity) const
   {
-    // //TODO replace this with getting initial fiber coordinates from parameters/material file
-    // //creating array to get fiber coordinates before creating tensor
-    // dealii::Tensor<1, dim> fiber;
-    // fiber[0] = this->fiber[0];
-    // fiber[1] = this->fiber[1];
-    // //define z axis only for 3D case (otherwise out of bounds)
-    // if (dim == 3){
-    //   fiber[2] = this->fiber[2];
-    // }
-    
-    // //std::cout << fiber[0] << " , " << fiber[1] << "\n";
-
-    // //Define deformation gradient F
-    // dealii::Tensor<2, dim> F = grad_u + dealii::unit_symmetric_tensor<dim>();
-    // // for (int i = 0; i < dim; i++){
-    // //   F[i][i]++;
-    // // }
-    // //dealii::Tensor<2, dim> F = grad_u + dealii::SymmetricTensor<2, dim>::unit_symmetric_tensor();
-
-    // //rotate fiber direction from initial to current fiber direction
-    // fiber = F*fiber;
-
     dealii::Tensor<1, dim> current_fiberxy, xaxis;
     current_fiberxy[0] = current_fiber[0];
     current_fiberxy[1] = current_fiber[1];
@@ -251,11 +187,6 @@ namespace Solid
     }
     else if(dim == 3)
     {
-      //TODO change to pre-defined constant:
-      //std::numbers::pi
-      //3d case needs phi to account for components in the z direction, which is found using xy projection and full fiber direction
-      //constexpr double pi = 3.14159265358979323846;
-      //const double pi = 3.14159265358979323846;
       double phi = current_fiberxy.norm() == 0 ? M_PI/2 : dealii::Physics::VectorRelations::angle(current_fiber, current_fiberxy);
       phi = current_fiber[2] > 0 ? phi : -phi;
 
@@ -270,7 +201,6 @@ namespace Solid
     }
     //Create temporary asymmetric tensor for multiplications then converting to symmetric after
     dealii::Tensor<4, dim> temp, temp2;
-    //dealii::SymmetricTensor<4, dim> elasticityCartesian;
 
     //Rotate about i and l
     temp = R*elasticity*transpose(R);
