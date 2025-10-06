@@ -206,6 +206,9 @@ namespace Solid
           spacedim,
           PETScWrappers::MPI::Vector(locally_owned_scalar_dofs,
                                      mpi_communicator)));
+      
+      energy = PETScWrappers::MPI::Vector(locally_owned_scalar_dofs,
+                                     mpi_communicator);
     }
 
     // Solve linear system \f$Ax = b\f$ using CG solver.
@@ -323,6 +326,9 @@ namespace Solid
           data_out.add_data_vector(
             scalar_dof_handler, localized_stress[2][2], "Szz");
         }
+
+      data_out.add_data_vector(
+          scalar_dof_handler, energy, "Energy");
 
       data_out.set_cell_selection(
         [this](const typename Triangulation<dim>::cell_iterator &cell) {

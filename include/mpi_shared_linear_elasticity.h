@@ -65,6 +65,7 @@ namespace Solid
       void run_one_step(bool first_step);
 
       std::vector<LinearElasticMaterial<dim>> material;
+      using SharedSolidSolver<dim>::energy;
     };
   } // namespace MPI
 } // namespace Solid

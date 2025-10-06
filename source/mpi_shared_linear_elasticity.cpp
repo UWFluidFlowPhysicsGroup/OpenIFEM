@@ -430,6 +430,13 @@ namespace Solid
         dim,
         std::vector<Vector<double>>(
           dim, Vector<double>(volume_quad_formula.size())));
+      
+      // Strain energy is a scalar value found through the cell strain and stress
+      // Currently finding strain energy from the stress and strain at each quadrature point
+      // haven't found efficient way to find element wise multiplication of 
+      // stress and strain tensors from cell or global values, skipping redundant steps  
+      Vector<double> quad_energy(volume_quad_formula.size());
+      Vector<double> cell_energy(Vector<double>(scalar_fe.dofs_per_cell));
 
       // Displacement gradients at quadrature points.
       std::vector<Tensor<2, dim>> current_displacement_gradients(
@@ -489,6 +496,9 @@ namespace Solid
                           quad_stress[i][j][q] = tmp_stress[i][j];
                         }
                     }
+
+                  //this is double dot product, tested externally
+                  quad_energy[q] = tmp_stress*tmp_strain/2;
                 }
 
               for (unsigned int i = 0; i < dim; ++i)
@@ -497,14 +507,22 @@ namespace Solid
                     {
                       qpt_to_dof.vmult(cell_strain[i][j], quad_strain[i][j]);
                       qpt_to_dof.vmult(cell_stress[i][j], quad_stress[i][j]);
+
+
                       scalar_cell->distribute_local_to_global(cell_strain[i][j],
                                                               strain[i][j]);
                       scalar_cell->distribute_local_to_global(cell_stress[i][j],
                                                               stress[i][j]);
+                      // Currently doing dot product of stress and strain, need to find how to produce vector at end of multiplication
+                      // cannot use scalar_fe.dofs_per_cell or temp var scalar_dofs because not constant
+                      //cell_strain_energy += (cell_stress[i][j] * SymmetricTensor<2, scalar_dofs>::unit_symmetric_tensor() * cell_strain[i][j])/2;
                     }
                 }
+
               scalar_cell->distribute_local_to_global(local_sorrounding_cells,
                                                       surrounding_cells);
+              qpt_to_dof.vmult(cell_energy, quad_energy);
+              scalar_cell->distribute_local_to_global(cell_energy, energy);
             }
         }
       surrounding_cells.compress(VectorOperation::add);
@@ -528,6 +546,16 @@ namespace Solid
               stress[i][j].compress(VectorOperation::insert);
             }
         }
+      energy.compress(VectorOperation::add);
+      const unsigned int local_begin =
+        surrounding_cells.local_range().first;
+      const unsigned int local_end =
+        surrounding_cells.local_range().second;
+      for (unsigned int k = local_begin; k < local_end; ++k)
+        {
+          energy[k] /= surrounding_cells[k];
+        }
+      energy.compress(VectorOperation::insert);
     }
 
     template class SharedLinearElasticity<2>;
