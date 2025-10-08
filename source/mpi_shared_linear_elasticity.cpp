@@ -547,14 +547,14 @@ namespace Solid
             }
         }
       energy.compress(VectorOperation::add);
-      const unsigned int local_begin =
-        surrounding_cells.local_range().first;
-      const unsigned int local_end =
-        surrounding_cells.local_range().second;
-      for (unsigned int k = local_begin; k < local_end; ++k)
-        {
-          energy[k] /= surrounding_cells[k];
-        }
+      // const unsigned int local_begin =
+      //   surrounding_cells.local_range().first;
+      // const unsigned int local_end =
+      //   surrounding_cells.local_range().second;
+      // for (unsigned int k = local_begin; k < local_end; ++k)
+      //   {
+      //     energy[k] /= surrounding_cells[k];
+      //   }
       energy.compress(VectorOperation::insert);
     }
 

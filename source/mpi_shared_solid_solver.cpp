@@ -261,6 +261,10 @@ namespace Solid
               localized_stress[i][j] = stress[i][j];
             }
         }
+
+      Vector<double> localized_energy(energy);
+      // localized_energy = energy;
+      
       std::vector<std::string> solution_names(spacedim, "displacements");
       std::vector<DataComponentInterpretation::DataComponentInterpretation>
         data_component_interpretation(
@@ -328,7 +332,7 @@ namespace Solid
         }
 
       data_out.add_data_vector(
-          scalar_dof_handler, energy, "Energy");
+          scalar_dof_handler, localized_energy, "Energy");
 
       data_out.set_cell_selection(
         [this](const typename Triangulation<dim>::cell_iterator &cell) {
