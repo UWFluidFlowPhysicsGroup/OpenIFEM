@@ -52,6 +52,14 @@ namespace Solid
 
     private:
       /**
+       * Members in its template-base class.
+       * Annoying C++ feature: the compiler does not know how to access
+       * template-derived members unless you tell it explicitly by using
+       * declarations or this->Foo.
+       */
+      using SharedSolidSolver<dim>::energy;
+      
+      /**
        * Assembles lhs and rhs. At time step 0, the lhs is the mass matrix;
        * at all the following steps, it is \f$ M + \beta{\Delta{t}}^2K \f$.
        */
@@ -65,7 +73,6 @@ namespace Solid
       void run_one_step(bool first_step);
 
       std::vector<LinearElasticMaterial<dim>> material;
-      using SharedSolidSolver<dim>::energy;
     };
   } // namespace MPI
 } // namespace Solid

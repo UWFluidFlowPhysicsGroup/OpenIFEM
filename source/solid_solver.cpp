@@ -111,6 +111,7 @@ namespace Solid
       std::vector<Vector<double>>(spacedim,
                                   Vector<double>(scalar_dof_handler.n_dofs())));
 
+    energy = Vector<double>(scalar_dof_handler.n_dofs());
     // Set up cell property, which contains the FSI traction required in FSI
     // simulation
     cell_property.initialize(triangulation.begin_active(),
@@ -142,6 +143,17 @@ namespace Solid
   SolidSolver<dim, spacedim>::output_results(const unsigned int output_index)
   {
     TimerOutput::Scope timer_section(timer, "Output results");
+
+    for (unsigned int x = 0; x < strain[0][0].size(); x++)
+      {
+        for (unsigned int i = 0; i < dim; ++i)
+          {
+            for (unsigned int j = 0; j < dim; ++j)
+              {
+                energy[x] += strain[i][j][x]*stress[i][j][x]/2;
+              }
+          }
+      }
 
     std::vector<std::string> solution_names(spacedim, "displacements");
 
@@ -189,6 +201,8 @@ namespace Solid
         data_out.add_data_vector(scalar_dof_handler, stress[1][2], "Syz");
         data_out.add_data_vector(scalar_dof_handler, stress[2][2], "Szz");
       }
+    
+    data_out.add_data_vector(scalar_dof_handler, energy, "Energy");
 
     data_out.build_patches();
 

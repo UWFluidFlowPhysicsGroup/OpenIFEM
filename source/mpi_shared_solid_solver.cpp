@@ -262,8 +262,18 @@ namespace Solid
             }
         }
 
-      Vector<double> localized_energy(energy);
-      // localized_energy = energy;
+        Vector<double> localized_energy(localized_strain[0][0]);
+        //energy equation only valid for linear elastic
+        for (unsigned int x = 0; x < localized_strain[0][0].size(); x++)
+          {
+            for (unsigned int i = 0; i < dim; ++i)
+              {
+                for (unsigned int j = 0; j < dim; ++j)
+                  {
+                    localized_energy[x] += localized_strain[i][j][x]*localized_stress[i][j][x]/2;
+                  }
+              }
+          }
       
       std::vector<std::string> solution_names(spacedim, "displacements");
       std::vector<DataComponentInterpretation::DataComponentInterpretation>
@@ -300,6 +310,7 @@ namespace Solid
             {
               mat[cell->active_cell_index()] = cell->material_id();
             }
+          //goes through every cell, can maybe calculate energy from stress and strain here instead?
         }
       data_out.add_data_vector(mat, "material_id");
 

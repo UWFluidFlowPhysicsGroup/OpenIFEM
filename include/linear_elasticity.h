@@ -70,7 +70,7 @@ namespace Solid
     using SolidSolver<dim>::time;
     using SolidSolver<dim>::timer;
     using SolidSolver<dim>::cell_property;
-
+    // using SolidSolver<dim>::energy;
     /**
      * Assembles lhs and rhs. At time step 0, the lhs is the mass matrix;
      * at all the following steps, it is \f$ M + \beta{\Delta{t}}^2K \f$.

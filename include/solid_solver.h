@@ -163,7 +163,7 @@ namespace Solid
      */
     mutable std::vector<std::vector<Vector<double>>> strain, stress;
 
-    // Vector<double> energy;
+    Vector<double> energy;
 
     Utils::Time time;
     mutable TimerOutput timer;
