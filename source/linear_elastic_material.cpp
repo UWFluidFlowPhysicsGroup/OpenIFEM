@@ -64,92 +64,68 @@ namespace Solid
     Then just run through each material type, multiply by that mapping matrix and add to elasticity matrix
     */
     //find k before filling elasticity tensor
-    const double constk = 1-2*(this->E2*(1+this->nu23)*pow(this->nu12,2))/this->E1-pow(this->nu23,2);
-    //TODO: defining G12 same as later on in the for loop, isotropic test case rn
-    //G12 = (E1*(1-pow(nu23,2))-E2*nu12*(1+nu23))/(2*constk);
+     // Pre-compute constant values outside the loop to avoid repeated calculations
+    const double constk = 1 - 2*(this->E2*(1+this->nu23)*pow(this->nu12,2))/this->E1 - pow(this->nu23,2);
+    
 
-    //SymmetricTensor object automatically applies symmetries in ijkl=jikl=ijlk, but still need to manually input ijkl=klij
-    int m=0, n=0;
-    for (unsigned int i = 0; i < dim; ++i)
-        {
-          for (unsigned int j = 0; j < dim; ++j)
-            {
-              for (unsigned int k = 0; k < dim; ++k)
-                {
-                  for (unsigned int l = 0; l < dim; ++l)
-                    {
-                      //Create temporary indices m, n to write equivalent Voigt notation for ijkl, makes it easier to process and visualize each case
-                      //TODO make another function to convert Einstein to Voigt? (input a, b and output c to avoid duplicate loops for m, n?)
-                      m=0;
-                      n=0;
+    // improvements
+    // precomputed elasticity components
+    // lambda functions for conversion to voigt notation
+    // moved voigt index calcualtions outside most inner loop
+    // const for compiler optimization
+    // easy to read and debug
 
-                      if (i==0 && j==0) {
-                        m=1;
-                      } else if (i==1 && j==1) {
-                        m=2;
-                      } else if (i==2 && j==2) {
-                        m=3;
-                      } else if ((i==1 && j==2)||((i==2 && j==1))) {
-                        m=4;
-                      } else if ((i==0 && j==2)||((i==2 && j==0))) {
-                        m=5;
-                      } else if ((i==0 && j==1)||((i==1 && j==0))) {
-                        m=6;
-                      }
-
-                      if (k==0 && l==0) {
-                        n=1;
-                      } else if (k==1 && l==1) {
-                        n=2;
-                      } else if (k==2 && l==2) {
-                        n=3;
-                      } else if ((k==1 && l==2)||((k==2 && l==1))) {
-                        n=4;
-                      } else if ((k==0 && l==2)||((k==2 && l==0))) {
-                        n=5;
-                      } else if ((k==0 && l==1)||((k==1 && l==0))) {
-                        n=6;
-                      }
-
-                      if(m==1 && n==1)
-                      {
-                        elasticity[i][j][k][l] = this->E1*(1-pow(this->nu23,2))/constk;
-                      }
-                      else if((m==2 && n==2)||(m==3 && n==3))
-                      {
-                        elasticity[i][j][k][l] = this->E2*(1-this->E2/this->E1*pow(this->nu12,2))/constk;
-                      }
-                      else if(m==1 && (n==2 || n==3))
-                      {
-                        elasticity[i][j][k][l] = this->E2*this->nu12*(1+this->nu23)/constk;
-                        //applying symmetry along main diagonal (not automatically done for SymmetricTensor)
-                        elasticity[k][l][i][j] = elasticity[i][j][k][l];
-                      }
-                      else if(m==2 && n==3)
-                      {
-                        elasticity[i][j][k][l] = this->E2*(this->E2/this->E1*pow(this->nu12,2)+this->nu23)/constk;
-                        //applying symmetry along main diagonal (not automatically done for SymmetricTensor)
-                        elasticity[k][l][i][j] = elasticity[i][j][k][l];
-                      }
-                      else if(m==4 && n==4)
-                      {
-                        //C11 and C12 are already known based on order of for loops (all of i=1 is done first), but writing explicitly just to be safe
-                        elasticity[i][j][k][l] = (this->E1*(1-pow(this->nu23,2))-this->E2*this->nu12*(1+this->nu23))/(2*constk);
-                      }
-                      else if((m==5 && n==5)||(m==6 && n==6))
-                      {
+    // define elasticity components (only computed once instead of in every iteration)
+    // Cmn --> m and n represent the resp. matrix entry
+    const double C11 = this->E1*(1-pow(this->nu23,2))/constk;
+    const double C22 = this->E2*(1-this->E2/this->E1*pow(this->nu12,2))/constk;
+    const double C12 = this->E2*this->nu12*(1+this->nu23)/constk;
+    const double C23 = this->E2*(this->E2/this->E1*pow(this->nu12,2)+this->nu23)/constk;
+    const double C44 = (this->E1*(1-pow(this->nu23,2))-this->E2*this->nu12*(1+this->nu23))/(2*constk);
+    
+    // lambda function to convert tensor indices (i,j) to Voigt notation
+    // returns values 1-6, with 0 indicating an invalid combination
+    auto to_voigt = [](unsigned int i, unsigned int j) -> int {
+        if (i == 0 && j == 0) return 1;
+        if (i == 1 && j == 1) return 2;
+        if (i == 2 && j == 2) return 3;
+        if ((i == 1 && j == 2) || (i == 2 && j == 1)) return 4;
+        if ((i == 0 && j == 2) || (i == 2 && j == 0)) return 5;
+        if ((i == 0 && j == 1) || (i == 1 && j == 0)) return 6;
+        return 0;
+    };
+    
+    for (unsigned int i = 0; i < dim; ++i) {
+        for (unsigned int j = 0; j < dim; ++j) {
+            // Compute Voigt index m once per (i,j) pair instead of for every (i,j,k,l)
+            const int m = to_voigt(i, j);
+            
+            for (unsigned int k = 0; k < dim; ++k) {
+                for (unsigned int l = 0; l < dim; ++l) {
+                    // Compute Voigt index n once per (k,l) pair
+                    const int n = to_voigt(k, l);
+                    
+                    // Use pre-computed values and simplified conditional logic
+                    if (m == 1 && n == 1) {
+                        elasticity[i][j][k][l] = C11;
+                    } else if ((m == 2 && n == 2) || (m == 3 && n == 3)) {
+                        elasticity[i][j][k][l] = C22;
+                    } else if (m == 1 && (n == 2 || n == 3)) {
+                        elasticity[i][j][k][l] = C12;
+                        elasticity[k][l][i][j] = C12;  // Symmetry
+                    } else if (m == 2 && n == 3) {
+                        elasticity[i][j][k][l] = C23;
+                        elasticity[k][l][i][j] = C23;  // Symmetry
+                    } else if (m == 4 && n == 4) {
+                        elasticity[i][j][k][l] = C44;
+                    } else if ((m == 5 && n == 5) || (m == 6 && n == 6)) {
                         elasticity[i][j][k][l] = this->G12;
-                      }
                     }
                 }
             }
         }
-        
-        //TODO find way to pass empty tensor without having to declare it first
-        //maybe just delete?
-        //dealii::Tensor<1, dim> emptyTensor;
-        //elasticity = rotate_tensor(emptyTensor, elasticity);
-  } 
+    }
+}
   return elasticity;
     
     /*
