@@ -407,8 +407,6 @@ namespace Parameters
                         Patterns::List(dealii::Patterns::Double(0, 0.5)),
                         "Poisson's ratio, only used by linear elastic solver");
       
-      //TODO add isotropic/anisotropic material type and input for fiber direction
-      //Use solid dirichelt BCs as template for fiber direction
       prm.declare_entry("Material type",
                         "Isotropic",
                         Patterns::List(dealii::Patterns::Selection("Isotropic|PlanarIsotropic")),
@@ -465,19 +463,80 @@ namespace Parameters
       material_type = Utilities::split_string_list(raw_input);
       AssertThrow(material_type.size() == n_solid_parts,
                 ExcMessage("Inconsistent material types!"));
-
       
-      //resizing isotropic and anisotropic tensor properties to all be same length and default to 0 when not used, helps with indexing when creating materials
+      C.resize(n_solid_parts);
+      solid_rho = prm.get_double("Solid density"); 
+
+      //Resizing isotropic properties
       E.resize(n_solid_parts, 0);
       nu.resize(n_solid_parts, 0);
-      //Anisotropic properties
+      //Resizing anisotropic properties
       fiber.resize(n_solid_parts);
       E1.resize(n_solid_parts, 0);
       E2.resize(n_solid_parts, 0);
       nu12.resize(n_solid_parts, 0);
       nu23.resize(n_solid_parts, 0);
       G12.resize(n_solid_parts,0);
+
+      std::vector<std::string> parsed_input;
       
+      unsigned int n_iso_parts, n_planar_iso_parts;
+
+      for (unsigned int i = 0; i < n_solid_parts; i++){
+        //define fiber tensor for each material, materials that dont use fiber direction will be 0 vector
+        fiber[i].resize(solid_material_dim, 0);
+        if (material_type[i] == "Isotropic")
+          {
+            //get E, nu values and set to full matrix;
+            raw_input = prm.get("Young's modulus");
+            parsed_input = Utilities::split_string_list(raw_input);
+            E[i] = Utilities::string_to_double(parsed_input[n_iso_parts]);
+            
+            raw_input = prm.get("Poisson's ratio");
+            parsed_input = Utilities::split_string_list(raw_input);
+            nu[i] = Utilities::string_to_double(parsed_input[n_iso_parts]);
+
+            //need to check right number of iso or aniso parts somewhere else
+            AssertThrow(E.size() == n_solid_parts,
+                        ExcMessage("Inconsistent Youngs' moduli!"));
+
+            n_iso_parts++;
+          }
+        if (material_type[i] == "PlanarIsotropic")
+          {
+            raw_input = prm.get("Initial fiber direction");
+            parsed_input = Utilities::split_string_list(raw_input);
+            //Causes error when Isotropic then PlanarIsotropic, need to account for skipping fiber direction values when using isotropic?
+            fiber[i][0] = Utilities::string_to_double(parsed_input[n_planar_iso_parts*solid_material_dim]);
+            fiber[i][1] = Utilities::string_to_double(parsed_input[n_planar_iso_parts*solid_material_dim + 1]);
+            if (solid_material_dim == 3)
+              {
+                fiber[i][2] = Utilities::string_to_double(parsed_input[n_planar_iso_parts*solid_material_dim + 2]);
+              }
+            
+            raw_input = prm.get("Young's modulus 1");
+            parsed_input = Utilities::split_string_list(raw_input);
+            E1[i] = Utilities::string_to_double(parsed_input[n_planar_iso_parts]);
+            raw_input = prm.get("Young's modulus 2");
+            parsed_input = Utilities::split_string_list(raw_input);
+            E2[i] = Utilities::string_to_double(parsed_input[n_planar_iso_parts]);
+            raw_input = prm.get("Poisson's ratio 12");
+            parsed_input = Utilities::split_string_list(raw_input);
+            nu12[i] = Utilities::string_to_double(parsed_input[n_planar_iso_parts]);
+            raw_input = prm.get("Poisson's ratio 23");
+            parsed_input = Utilities::split_string_list(raw_input);
+            nu23[i] = Utilities::string_to_double(parsed_input[n_planar_iso_parts]);
+            raw_input = prm.get("Shear modulus");
+            parsed_input = Utilities::split_string_list(raw_input);
+            G12[i] = Utilities::string_to_double(parsed_input[n_planar_iso_parts]);
+            
+            n_planar_iso_parts++;
+          }
+
+      }
+
+
+      /*
       C.resize(n_solid_parts);
       solid_rho = prm.get_double("Solid density"); 
       //TODO change to loop through each material in the list
@@ -503,6 +562,7 @@ namespace Parameters
         //not sure if properly assigns fiber directions
         raw_input = prm.get("Initial fiber direction");
         parsed_input = Utilities::split_string_list(raw_input);
+        //Causes error when Isotropic then PlanarIsotropic, need to account for skipping fiber direction values when using isotropic?
         for (unsigned int i = 0; i < n_solid_parts; i++)
         {
           fiber[i].resize(solid_material_dim, 0);
@@ -533,6 +593,8 @@ namespace Parameters
         parsed_input = Utilities::split_string_list(raw_input);
         G12 = Utilities::string_to_double(parsed_input);
       }
+
+      */
 
       raw_input = prm.get("Viscosity");
       parsed_input = Utilities::split_string_list(raw_input);

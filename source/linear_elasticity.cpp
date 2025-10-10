@@ -464,8 +464,6 @@ namespace Solid
                     stress[i][j][dof_indices[k]] += cell_stress[i][j][k];
                     // checking for j=0 to avoid repeated addition as j = 0 -> dim
                     if (material[mat_id - 1].material_type != "Isotropic" && j == 0){
-                      // this is VERY slow, need to fix
-                      // fiber[i][dof_indices[k]] += cell_fiber[i][k];
                       fiber[dim*dof_indices[k]] += cell_fiber[0][k];
                       fiber[dim*dof_indices[k] + 1] += cell_fiber[1][k];
                       if (dim == 3)
@@ -486,15 +484,11 @@ namespace Solid
               {
                 strain[i][j][k] /= surrounding_cells[k];
                 stress[i][j][k] /= surrounding_cells[k];
-                //if (material[mat_id - 1].material_type != "Isotropic")
-                //{
+                
                 fiber[dim*k] /= surrounding_cells[k];
                 fiber[dim*k + 1] /= surrounding_cells[k];
                 if (dim == 3)
                   fiber[dim*k + 2] /= surrounding_cells[k];
-                  //if (material[mat_id - 1].material_type != "Isotropic")
-                  //fiber[i][j][k] /= surrounding_cells[k];
-                //}
               }
           }
       }
