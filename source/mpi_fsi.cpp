@@ -914,15 +914,25 @@ namespace MPI
                          v < GeometryInfo<dim>::vertices_per_face;
                          ++v)
                       {
+                        Point<dim> vertex_displacement;
+                        Vector<double> localized_displacement(solid_solver.current_displacement);
+                        // Code to get displacement vector for current vertex (need to use for current criterion)
+                        for (unsigned int d = 0; d < dim; ++d)
+                        {
+                          vertex_displacement[d] =
+                            localized_displacement(s_cell->vertex_dof_index(v, d));
+                        }
                         // Check if the vertex is penetrating
                         double penetration_value = std::invoke(
-                          *penetration_criterion, s_cell->face(f)->vertex(v));
+                          *penetration_criterion, s_cell->face(f)->vertex(v), vertex_displacement);
                         if (penetration_value > 1e-5)
                           {
-                            still_penetrate = true;
+                            Tensor<1, dim> penetration_direction_vector = std::invoke(
+                              *penetration_direction, s_cell->face(f)->vertex(v), vertex_displacement);
+                             still_penetrate = true;
                             traction = force_increment * penetration_value /
-                                       penetration_direction.norm() *
-                                       penetration_direction;
+                                       penetration_direction_vector.norm() *
+                                       penetration_direction_vector;
                           }
                         else
                           {
@@ -1226,14 +1236,30 @@ namespace MPI
       }
   }
 
+  // template <int dim>
+  // void FSI<dim>::set_penetration_criterion(
+  //   const std::function<double(const Point<dim> &)> &criterion,
+  //   Tensor<1, dim> direction)
   template <int dim>
   void FSI<dim>::set_penetration_criterion(
-    const std::function<double(const Point<dim> &)> &criterion,
-    Tensor<1, dim> direction)
+    const std::function<double(const Point<dim> &, const Point<dim> &)> &criterion)
   {
     penetration_criterion.reset(
-      new std::function<double(const Point<dim> &)>(criterion));
-    penetration_direction = direction;
+      new std::function<double(const Point<dim> &, const Point<dim> &)>(criterion));
+    // penetration_direction = direction;
+  }
+
+  // template <int dim>
+  // void FSI<dim>::set_penetration_direction(
+  //   const std::function<double(const Point<dim> &)> &criterion,
+  //   const std::function<Tensor<1, dim>(const Point<dim> &)> &direction)
+  template <int dim>
+  void FSI<dim>::set_penetration_direction(
+    const std::function<Tensor<1, dim>(const Point<dim> &, const Point<dim> &)> &direction)
+  {
+    penetration_direction.reset(
+      new std::function<Tensor<1, dim>(const Point<dim> &, const Point<dim> &)>(direction));
+    // penetration_direction = direction;
   }
 
   template class FSI<2>;

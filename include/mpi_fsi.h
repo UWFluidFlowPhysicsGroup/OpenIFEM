@@ -43,8 +43,12 @@ namespace MPI
     void run();
 
     void
-    set_penetration_criterion(const std::function<double(const Point<dim> &)> &,
-                              Tensor<1, dim>);
+    set_penetration_criterion(const std::function<double(const Point<dim> &, const Point<dim> &)> &);
+    // set_penetration_criterion(const std::function<double(const Point<dim> &)> &,
+    //                           Tensor<1, dim>);
+    
+    void
+    set_penetration_direction(const std::function<Tensor<1, dim>(const Point<dim> &, const Point<dim> &)> &);
 
     //! Destructor
     ~FSI();
@@ -168,9 +172,12 @@ namespace MPI
       cell_hints;
 
     // A function that determines if a point is penetrating the fluid domain
-    std::shared_ptr<std::function<double(const Point<dim> &)>>
+    std::shared_ptr<std::function<double(const Point<dim> &, const Point<dim> &)>>
       penetration_criterion;
-    Tensor<1, dim> penetration_direction;
+    // A function that determines the resulting force direction if penetration occurs
+    // Tensor<1, dim> penetration_direction;
+    std::shared_ptr<std::function<Tensor<1, dim>(const Point<dim> &, const Point<dim> &)>>
+      penetration_direction;
 
     bool use_dirichlet_bc;
   };
