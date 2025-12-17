@@ -915,12 +915,17 @@ namespace MPI
                          ++v)
                       {
                         Point<dim> vertex_displacement;
-                        Vector<double> localized_displacement(solid_solver.current_displacement);
+                        //need to create localized displacement otherwise error from accessing data outside local PETSc core stored value
+                          //Ex. accessing outside of mpi subdomain
+                        // Vector<double> localized_displacement(solid_solver.current_displacement);
                         // Code to get displacement vector for current vertex (need to use for current criterion)
                         for (unsigned int d = 0; d < dim; ++d)
                         {
+                          // vertex_displacement[d] =
+                          //   localized_displacement(s_cell->vertex_dof_index(v, d));
+                          // can use cached_current_displacement instead of creating new variable that has same data stored
                           vertex_displacement[d] =
-                            localized_displacement(s_cell->vertex_dof_index(v, d));
+                            cached_current_displacement(s_cell->vertex_dof_index(v, d));
                         }
                         // Check if the vertex is penetrating
                         double penetration_value = std::invoke(
@@ -929,7 +934,7 @@ namespace MPI
                           {
                             Tensor<1, dim> penetration_direction_vector = std::invoke(
                               *penetration_direction, s_cell->face(f)->vertex(v), vertex_displacement);
-                             still_penetrate = true;
+                            still_penetrate = true;
                             traction = force_increment * penetration_value /
                                        penetration_direction_vector.norm() *
                                        penetration_direction_vector;
@@ -940,15 +945,17 @@ namespace MPI
                           }
                         auto line = s_cell->face(f)->vertex_dof_index(v, 0);
                         // Compute the extra stress from the face
+                        //TODO fix calculations for extra stresses, only worked in some conditions
                         Tensor<2, dim> extra_stress;
                         for (unsigned int d = 0; d < dim; ++d)
                           {
                             extra_stress[d][dim - 1] =
-                              fe_face_values.normal_vector(0)[d] > 1e-5
+                              abs(fe_face_values.normal_vector(0)[d]) > 1e-5
                                 ? traction[d] /
                                     fe_face_values.normal_vector(0)[d]
                                 : 0;
                           }
+                          
                         // Assign the extra stress to local row vectors
                         for (unsigned int d1 = 0; d1 < dim; ++d1)
                           {
