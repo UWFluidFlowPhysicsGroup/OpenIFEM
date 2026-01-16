@@ -206,6 +206,9 @@ namespace Solid
           spacedim,
           PETScWrappers::MPI::Vector(locally_owned_scalar_dofs,
                                      mpi_communicator)));
+      
+      energy = PETScWrappers::MPI::Vector(locally_owned_scalar_dofs,
+                                     mpi_communicator);
     }
 
     // Solve linear system \f$Ax = b\f$ using CG solver.
@@ -258,6 +261,20 @@ namespace Solid
               localized_stress[i][j] = stress[i][j];
             }
         }
+
+        Vector<double> localized_energy(localized_strain[0][0]);
+        //energy equation only valid for linear elastic
+        for (unsigned int x = 0; x < localized_strain[0][0].size(); x++)
+          {
+            for (unsigned int i = 0; i < dim; ++i)
+              {
+                for (unsigned int j = 0; j < dim; ++j)
+                  {
+                    localized_energy[x] += localized_strain[i][j][x]*localized_stress[i][j][x]/2;
+                  }
+              }
+          }
+      
       std::vector<std::string> solution_names(spacedim, "displacements");
       std::vector<DataComponentInterpretation::DataComponentInterpretation>
         data_component_interpretation(
@@ -293,6 +310,7 @@ namespace Solid
             {
               mat[cell->active_cell_index()] = cell->material_id();
             }
+          //goes through every cell, can maybe calculate energy from stress and strain here instead?
         }
       data_out.add_data_vector(mat, "material_id");
 
@@ -323,6 +341,9 @@ namespace Solid
           data_out.add_data_vector(
             scalar_dof_handler, localized_stress[2][2], "Szz");
         }
+
+      data_out.add_data_vector(
+          scalar_dof_handler, localized_energy, "Energy");
 
       data_out.set_cell_selection(
         [this](const typename Triangulation<dim>::cell_iterator &cell) {

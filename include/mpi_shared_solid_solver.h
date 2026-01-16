@@ -218,6 +218,8 @@ namespace Solid
       
       Vector<double> fiber;
 
+      mutable PETScWrappers::MPI::Vector energy;
+
       MPI_Comm mpi_communicator;
       const unsigned int n_mpi_processes;
       const unsigned int this_mpi_process;
