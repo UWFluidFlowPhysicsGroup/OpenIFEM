@@ -27,7 +27,7 @@ which conflict with the requirements."
     )
 endif()
 
-if(NOT (DEAL_II_WITH_PETSC OR DEAL_II_WITH_TRILINOS) OR NOT DEAL_II_WITH_P4EST OR DEAL_II_PETSC_WITH_COMPLEX) # keep in one line
+if(NOT DEAL_II_WITH_P4EST OR DEAL_II_PETSC_WITH_COMPLEX) # keep in one line
   message(FATAL_ERROR "
 Error! This tutorial requires a deal.II library that was configured with the following options:
     DEAL_II_WITH_PETSC = ON

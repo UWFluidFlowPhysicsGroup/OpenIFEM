@@ -44,14 +44,19 @@ int main(int argc, char *argv[])
           Fluid::MPI::SCnsIM<2> fluid(tria_fluid, params);
           Solid::MPI::SharedLinearElasticity<2> solid(tria_solid, params);
 
-          auto penetration_criterion = [](const Point<2> &p) -> double {
+          auto penetration_criterion = [](const Point<2> &p, const Point<2> &disp ) -> double {
             double wall_height = 1.0;
             return (p[1] - wall_height);
           };
+          auto penetration_direction = [](const Point<2> &p, const Point<2> &disp) {
+            return (Tensor<1, 2>({0, -1}));
+          };
 
           MPI::FSI<2> fsi(fluid, solid, params);
-          fsi.set_penetration_criterion(penetration_criterion,
-                                        Tensor<1, 2>({0, -1}));
+          // fsi.set_penetration_criterion(penetration_criterion,
+          //                               Tensor<1, 2>({0, -1}));
+          fsi.set_penetration_criterion(penetration_criterion);
+          fsi.set_penetration_direction(penetration_direction);
           fsi.run();
           Vector<double> u(solid.get_current_solution());
           double umin = *std::min_element(u.begin(), u.end());
