@@ -914,16 +914,11 @@ namespace MPI
                          v < GeometryInfo<dim>::vertices_per_face;
                          ++v)
                       {
+                        // Create and obtain displacements of vertex for direction-dependent
+                        // collision rules.
                         Point<dim> vertex_displacement;
-                        //need to create localized displacement otherwise error from accessing data outside local PETSc core stored value
-                          //Ex. accessing outside of mpi subdomain
-                        // Vector<double> localized_displacement(solid_solver.current_displacement);
-                        // Code to get displacement vector for current vertex (need to use for current criterion)
                         for (unsigned int d = 0; d < dim; ++d)
                         {
-                          // vertex_displacement[d] =
-                          //   localized_displacement(s_cell->vertex_dof_index(v, d));
-                          // can use cached_current_displacement instead of creating new variable that has same data stored
                           vertex_displacement[d] =
                             cached_current_displacement(s_cell->vertex_dof_index(v, d));
                         }
@@ -945,7 +940,6 @@ namespace MPI
                           }
                         auto line = s_cell->face(f)->vertex_dof_index(v, 0);
                         // Compute the extra stress from the face
-                        //TODO fix calculations for extra stresses, only worked in some conditions
                         Tensor<2, dim> extra_stress;
                         for (unsigned int d = 0; d < dim; ++d)
                           {
