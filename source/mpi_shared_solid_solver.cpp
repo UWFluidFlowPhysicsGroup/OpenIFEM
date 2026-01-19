@@ -206,7 +206,9 @@ namespace Solid
           spacedim,
           PETScWrappers::MPI::Vector(locally_owned_scalar_dofs,
                                      mpi_communicator)));
-      
+        
+      fiber.reinit(locally_owned_dofs, mpi_communicator);
+
       energy = PETScWrappers::MPI::Vector(locally_owned_scalar_dofs,
                                      mpi_communicator);
     }
@@ -310,7 +312,6 @@ namespace Solid
             {
               mat[cell->active_cell_index()] = cell->material_id();
             }
-          //goes through every cell, can maybe calculate energy from stress and strain here instead?
         }
       data_out.add_data_vector(mat, "material_id");
 
@@ -341,6 +342,14 @@ namespace Solid
           data_out.add_data_vector(
             scalar_dof_handler, localized_stress[2][2], "Szz");
         }
+      
+      // fiber
+      solution_names = std::vector<std::string>(spacedim, "fiber");
+      data_out.add_data_vector(fiber,
+                               solution_names,
+                               DataOut<dim, spacedim>::type_dof_data,
+                               data_component_interpretation);
+
 
       data_out.add_data_vector(
           scalar_dof_handler, localized_energy, "Energy");

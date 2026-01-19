@@ -73,6 +73,7 @@ namespace Solid
       using SolidSolver<dim>::timer;
       using SolidSolver<dim>::locally_owned_dofs;
       using SolidSolver<dim>::locally_relevant_dofs;
+      // using SolidSolver<dim>::fiber;
 
       /**
        * Assembles lhs and rhs. At time step 0, the lhs is the mass matrix;

@@ -160,6 +160,7 @@ namespace Solid
       PETScWrappers::MPI::Vector previous_acceleration;
       PETScWrappers::MPI::Vector previous_velocity;
       PETScWrappers::MPI::Vector previous_displacement;
+      PETScWrappers::MPI::Vector fiber;
 
       MPI_Comm mpi_communicator;
       ConditionalOStream pcout;

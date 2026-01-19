@@ -216,7 +216,7 @@ namespace Solid
       mutable std::vector<std::vector<PETScWrappers::MPI::Vector>> strain,
         stress;
       
-      Vector<double> fiber;
+      mutable PETScWrappers::MPI::Vector fiber;
 
       mutable PETScWrappers::MPI::Vector energy;
 

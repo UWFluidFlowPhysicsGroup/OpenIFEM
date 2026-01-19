@@ -58,6 +58,7 @@ namespace Solid
        * declarations or this->Foo.
        */
       using SharedSolidSolver<dim>::energy;
+      using SharedSolidSolver<dim>::fiber;
       
       /**
        * Assembles lhs and rhs. At time step 0, the lhs is the mass matrix;

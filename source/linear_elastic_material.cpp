@@ -147,10 +147,7 @@ namespace Solid
     return viscosity;
   }
 
-  //TODO can look into default
-  //std optional SymmetricTensor
-  //set field as optional
-  //Can also be used to rotate viscosity if anisotropic viscosity is required
+  // Function can be reused for rotating other 4th order tensors, such as anisotropic viscosity
   template <int dim>
   dealii::SymmetricTensor<4, dim>
   LinearElasticMaterial<dim>::rotate_tensor(dealii::Tensor<1, dim> current_fiber, dealii::SymmetricTensor<4, dim> elasticity) const

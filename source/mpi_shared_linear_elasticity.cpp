@@ -500,19 +500,21 @@ namespace Solid
                 {
                   if (material[mat_id - 1].material_type != "Isotropic")
                   {
-                    //Create tensor for elasticity tensor in principal coordinates
-                    //need to get elasticity again for each quadrature point
+                    // Create tensor for elasticity tensor in principal coordinates
+                    // reobtain material properties for each quadrature point
                     dealii::SymmetricTensor<4, dim> elasticity_principal = material[mat_id - 1].get_elasticity();
                   
                     dealii::Tensor<2, dim> tmp_current_displacement_gradients;
                     
+                    // Obtain current displacement gradient for the active quadrature point 
                     for (unsigned int i=0; i < dim; ++i){
                       for (unsigned int j=0; j < dim; ++j){
                         tmp_current_displacement_gradients[i][j] = current_displacement_gradients[q][i][j];
                       }
-
                     }
+
                     dealii::Tensor<1,dim> tmp_fiber = material[mat_id - 1].get_current_fiber_direction(tmp_current_displacement_gradients);
+                    
                     for (unsigned int i=0; i < dim; ++i)
                     {
                       quad_fiber[i][q] = tmp_fiber[i];        
@@ -533,6 +535,7 @@ namespace Solid
                           quad_strain[i][j][q] = tmp_strain[i][j];
                         }
                     }
+
                   tmp_stress = elasticity * tmp_strain;
                   for (unsigned int i = 0; i < dim; ++i)
                     {
@@ -541,9 +544,6 @@ namespace Solid
                           quad_stress[i][j][q] = tmp_stress[i][j];
                         }
                     }
-
-                  //this is double dot product, tested externally
-                  // quad_energy[q] = tmp_stress*tmp_strain/2;
                 }
 
               for (unsigned int i = 0; i < dim; ++i)
@@ -553,15 +553,12 @@ namespace Solid
                       qpt_to_dof.vmult(cell_strain[i][j], quad_strain[i][j]);
                       qpt_to_dof.vmult(cell_stress[i][j], quad_stress[i][j]);
                       
-                      // if (material[mat_id - 1].material_type != "Isotropic" && j == 0)
-                      // qpt_to_dof.vmult(cell_fiber[i], quad_fiber[i]);
+                      
 
                       scalar_cell->distribute_local_to_global(cell_strain[i][j],
                                                               strain[i][j]);
                       scalar_cell->distribute_local_to_global(cell_stress[i][j],
                                                               stress[i][j]);
-                      // scalar_cell->distribute_local_to_global(cell_fiber[i],
-                      //                                         fiber[i]);
                       // Currently doing dot product of stress and strain, need to find how to produce vector at end of multiplication
                       // cannot use scalar_fe.dofs_per_cell or temp var scalar_dofs because not constant
                       //cell_strain_energy += (cell_stress[i][j] * SymmetricTensor<2, scalar_dofs>::unit_symmetric_tensor() * cell_strain[i][j])/2;
@@ -571,6 +568,11 @@ namespace Solid
                       //   }
 
                     }
+                    if (material[mat_id - 1].material_type != "Isotropic")
+                      qpt_to_dof.vmult(cell_fiber[i], quad_fiber[i]);
+                    
+                    cell->distribute_local_to_global(cell_fiber[i],
+                                                              fiber);
                 }
 
               scalar_cell->distribute_local_to_global(local_sorrounding_cells,
@@ -580,10 +582,10 @@ namespace Solid
             }
         }
       surrounding_cells.compress(VectorOperation::add);
-
+      fiber.compress(VectorOperation::add);
       for (unsigned int i = 0; i < dim; ++i)
         {
-          // fiber[i].compress(VectorOperation::add);
+
           for (unsigned int j = 0; j < dim; ++j)
             {
               strain[i][j].compress(VectorOperation::add);
@@ -604,8 +606,9 @@ namespace Solid
               strain[i][j].compress(VectorOperation::insert);
               stress[i][j].compress(VectorOperation::insert);
             }
-          // fiber[i].compress(VectorOperation::insert);
         }
+      fiber.compress(VectorOperation::insert);
+
       // energy.compress(VectorOperation::add);
       // const unsigned int local_begin =
       //   surrounding_cells.local_range().first;

@@ -111,8 +111,6 @@ namespace Solid
       std::vector<Vector<double>>(spacedim,
                                   Vector<double>(scalar_dof_handler.n_dofs())));
       
-    // fiber = std::vector<Vector<double>>(
-    //   spacedim, Vector<double>(scalar_dof_handler.n_dofs()));
     fiber.reinit(dof_handler.n_dofs());
 
     energy = Vector<double>(scalar_dof_handler.n_dofs());
@@ -214,11 +212,11 @@ namespace Solid
     // otherwise breaks all the previous test cases
     // if (material_type != "Isotropic")
     // {
-      // solution_names = std::vector<std::string>(spacedim, "fiber direction");
-      // data_out.add_data_vector(dof_handler,
-      //                        fiber,
-      //                        solution_names,
-      //                        data_component_interpretation);
+      solution_names = std::vector<std::string>(spacedim, "fiber direction");
+      data_out.add_data_vector(dof_handler,
+                             fiber,
+                             solution_names,
+                             data_component_interpretation);
     // }
 
 

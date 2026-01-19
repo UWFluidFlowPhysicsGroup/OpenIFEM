@@ -480,21 +480,25 @@ namespace Parameters
 
       std::vector<std::string> parsed_input;
       
+
+      //TODO fix material declaration, working with n_iso_parts counters causing segmentation fault
+      //reindexing arrays causes segmentation fault?
       unsigned int n_iso_parts, n_planar_iso_parts;
 
       for (unsigned int i = 0; i < n_solid_parts; i++){
         //define fiber tensor for each material, materials that dont use fiber direction will be 0 vector
+        //is this causing the error?
         fiber[i].resize(solid_material_dim, 0);
         if (material_type[i] == "Isotropic")
           {
             //get E, nu values and set to full matrix;
             raw_input = prm.get("Young's modulus");
             parsed_input = Utilities::split_string_list(raw_input);
-            E[i] = Utilities::string_to_double(parsed_input[n_iso_parts]);
+            E[i] = Utilities::string_to_double(parsed_input[i]);
             
             raw_input = prm.get("Poisson's ratio");
             parsed_input = Utilities::split_string_list(raw_input);
-            nu[i] = Utilities::string_to_double(parsed_input[n_iso_parts]);
+            nu[i] = Utilities::string_to_double(parsed_input[i]);
 
             //need to check right number of iso or aniso parts somewhere else
             AssertThrow(E.size() == n_solid_parts,
@@ -507,28 +511,28 @@ namespace Parameters
             raw_input = prm.get("Initial fiber direction");
             parsed_input = Utilities::split_string_list(raw_input);
             //Causes error when Isotropic then PlanarIsotropic, need to account for skipping fiber direction values when using isotropic?
-            fiber[i][0] = Utilities::string_to_double(parsed_input[n_planar_iso_parts*solid_material_dim]);
-            fiber[i][1] = Utilities::string_to_double(parsed_input[n_planar_iso_parts*solid_material_dim + 1]);
+            fiber[i][0] = Utilities::string_to_double(parsed_input[i*solid_material_dim]);
+            fiber[i][1] = Utilities::string_to_double(parsed_input[i*solid_material_dim + 1]);
             if (solid_material_dim == 3)
               {
-                fiber[i][2] = Utilities::string_to_double(parsed_input[n_planar_iso_parts*solid_material_dim + 2]);
+                fiber[i][2] = Utilities::string_to_double(parsed_input[i*solid_material_dim + 2]);
               }
             
             raw_input = prm.get("Young's modulus 1");
             parsed_input = Utilities::split_string_list(raw_input);
-            E1[i] = Utilities::string_to_double(parsed_input[n_planar_iso_parts]);
+            E1[i] = Utilities::string_to_double(parsed_input[i]);
             raw_input = prm.get("Young's modulus 2");
             parsed_input = Utilities::split_string_list(raw_input);
-            E2[i] = Utilities::string_to_double(parsed_input[n_planar_iso_parts]);
+            E2[i] = Utilities::string_to_double(parsed_input[i]);
             raw_input = prm.get("Poisson's ratio 12");
             parsed_input = Utilities::split_string_list(raw_input);
-            nu12[i] = Utilities::string_to_double(parsed_input[n_planar_iso_parts]);
+            nu12[i] = Utilities::string_to_double(parsed_input[i]);
             raw_input = prm.get("Poisson's ratio 23");
             parsed_input = Utilities::split_string_list(raw_input);
-            nu23[i] = Utilities::string_to_double(parsed_input[n_planar_iso_parts]);
+            nu23[i] = Utilities::string_to_double(parsed_input[i]);
             raw_input = prm.get("Shear modulus");
             parsed_input = Utilities::split_string_list(raw_input);
-            G12[i] = Utilities::string_to_double(parsed_input[n_planar_iso_parts]);
+            G12[i] = Utilities::string_to_double(parsed_input[i]);
             
             n_planar_iso_parts++;
           }
@@ -593,7 +597,6 @@ namespace Parameters
         parsed_input = Utilities::split_string_list(raw_input);
         G12 = Utilities::string_to_double(parsed_input);
       }
-
       */
 
       raw_input = prm.get("Viscosity");
