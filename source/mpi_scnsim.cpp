@@ -534,6 +534,16 @@ namespace Fluid
                             cell->face(face_n)->boundary_id();
                           double boundary_values_p =
                             parameters.fluid_neumann_bcs[p_bc_id];
+
+                          //hardcoding boundary condition for oscillating inlet pressure testing
+                          if(p_bc_id == 10) {
+                            double p_const = 1000; // constant (mean) pressure Pa
+                            double p_flux = 5; // fluctuating (amplitude) pressure Pa
+                            double freq = 230; // oscillation frequency in Hz, based on expected phonation frequency
+                            double t_curr = time.get_delta_t()*(time.get_timestep()-1); // current time obtained from current timestep and delta_t
+                            boundary_values_p = p_const + p_flux*sin(2*pi*freq*t_curr);
+                          }
+
                           for (unsigned int q = 0; q < n_face_q_points; ++q)
                             {
                               for (unsigned int i = 0; i < dofs_per_cell; ++i)
