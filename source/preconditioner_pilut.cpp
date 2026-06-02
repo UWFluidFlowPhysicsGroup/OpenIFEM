@@ -218,7 +218,8 @@ void PreconditionEuclid::initialize(const PETScWrappers::MatrixBase &matrix_)
   ierr = PCSetType(pc, const_cast<char *>(PCHYPRE));
   AssertThrow(ierr == 0, ExcPETScError(ierr));
 
-  ierr = PCHYPRESetType_Euclid(pc);
+  ierr = PCHYPRESetType(pc, "euclid");
+  AssertThrow(ierr == 0, ExcPETScError(ierr));
 
   ierr = PCSetFromOptions(pc);
   AssertThrow(ierr == 0, ExcPETScError(ierr));
