@@ -125,6 +125,10 @@ namespace Fluid
       const double atm = 1013250;
       const double kappa_s = 1e4;
 
+      // Parameter for body force linear ramp, time until full strength body force (in s)
+      const double time_full = 5e-3;
+      double time_fraction = time.current() <= time_full ? time.current()/time_full : 1;
+      
       // Zero out sigma field and body force if their fields are not specified
       if (sigma_pml_field == nullptr)
         {
@@ -348,7 +352,7 @@ namespace Fluid
                                current_stress_divergence[q] -
                              // SUPG body force
                              tau_SUPG * phi_u[j] * grad_phi_u[i] * rho *
-                               (gravity + artificial_bf[q]) +
+                               (gravity + time_fraction*artificial_bf[q]) +
                              // SUPG PML
                              tau_SUPG * rho * current_velocity_values[q] *
                                grad_phi_u[i] * sigma_pml[q] * phi_u[j] +
@@ -433,7 +437,7 @@ namespace Fluid
                            (current_velocity_values[q] -
                             present_velocity_values[q]) *
                            phi_u[i] / time.get_delta_t() +
-                         (gravity + artificial_bf[q]) * phi_u[i] * rho) *
+                         (gravity + time_fraction*artificial_bf[q]) * phi_u[i] * rho) *
                         fe_values.JxW(q);
                       local_rhs(i) +=
                         -(rho * sigma_pml[q] * current_velocity_values[q] *
@@ -468,7 +472,7 @@ namespace Fluid
                                       current_velocity_gradients[q]) +
                              current_pressure_gradients[q] -
                              current_stress_divergence[q] -
-                             rho * (gravity + artificial_bf[q]) +
+                             rho * (gravity + time_fraction*artificial_bf[q]) +
                              rho * sigma_pml[q] * current_velocity_values[q]) +
                           (tau_PSPG * grad_phi_p[i]) *
                             (rho * ((current_velocity_values[q] -
@@ -478,7 +482,7 @@ namespace Fluid
                                       current_velocity_gradients[q]) +
                              current_pressure_gradients[q] -
                              current_stress_divergence[q] -
-                             rho * (gravity + artificial_bf[q]) +
+                             rho * (gravity + time_fraction*artificial_bf[q]) +
                              rho * sigma_pml[q] * current_velocity_values[q])) *
                         fe_values.JxW(q);
                       // Add LSIC rhs terms.
