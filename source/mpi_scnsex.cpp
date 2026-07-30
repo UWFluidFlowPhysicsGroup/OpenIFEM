@@ -227,6 +227,7 @@ namespace Fluid
                 }
               if (body_force)
                 {
+                  //BF are stored in tensors (1 x dim artificial BF points, need to convert time to match?)
                   body_force->tensor_value_list(
                     fe_values.get_quadrature_points(), artificial_bf);
                 }
