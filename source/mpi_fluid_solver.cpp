@@ -619,8 +619,9 @@ namespace Fluid
       parallel::distributed::SolutionTransfer<dim,
                                               PETScWrappers::MPI::BlockVector>
         sol_trans(dof_handler);
+      MPI_Barrier(mpi_communicator);
       sol_trans.prepare_for_serialization(present_solution);
-
+	pcout << "Prepared files for serialization" << std::endl;
       // Save the turbulence model solution is available
       std::optional<parallel::distributed::
                       SolutionTransfer<dim, PETScWrappers::MPI::Vector>>
